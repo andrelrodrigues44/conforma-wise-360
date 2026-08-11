@@ -1,5 +1,4 @@
-import painel from "@/assets/painel-dashboard.png.asset.json";
-import painel2 from "@/assets/painel-dashboard-2.png.asset.json";
+import painel from "@/assets/painel-full.png.asset.json";
 
 export function DashboardMockup() {
   return (
@@ -16,15 +15,8 @@ export function DashboardMockup() {
       <div className="bg-surface">
         <img
           src={painel.url}
-          alt="Painel Conforma360 com índice de conformidade, licenças, inspeções e indicadores operacionais"
+          alt="Painel Conforma360 com índice de conformidade, licenças, saúde do sistema, alertas e inspeções por semana"
           className="block w-full"
-          loading="lazy"
-          decoding="async"
-        />
-        <img
-          src={painel2.url}
-          alt="Saúde do sistema, alertas, inspeções por semana e ações rápidas no painel Conforma360"
-          className="-mt-px block w-full"
           loading="lazy"
           decoding="async"
         />
