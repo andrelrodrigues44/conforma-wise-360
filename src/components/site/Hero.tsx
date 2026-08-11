@@ -74,7 +74,7 @@ export function Hero() {
 
           <div className="reveal relative min-w-0 [animation-delay:150ms]">
             <DashboardMockup />
-            <PhoneMockup className="absolute -bottom-10 left-0 hidden origin-bottom-left -translate-x-1/2 scale-[0.65] sm:block lg:-left-6 lg:scale-[0.75]" />
+            <PhoneMockup className="absolute -bottom-8 -left-10 hidden origin-bottom-left scale-[0.62] sm:block lg:-left-14 lg:scale-[0.72]" />
           </div>
         </div>
       </div>
