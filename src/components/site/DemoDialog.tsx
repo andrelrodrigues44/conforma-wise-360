@@ -57,12 +57,12 @@ export function DemoDialog({ children }: { children: ReactNode }) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 pt-2">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Nome" name="nome" error={errors.nome} />
-            <Field label="Empresa" name="empresa" error={errors.empresa} />
-            <Field label="Cargo" name="cargo" error={errors.cargo} />
-            <Field label="Telefone" name="telefone" type="tel" error={errors.telefone} />
+            <Field label="Nome" name="nome" error={errors["nome"]} />
+            <Field label="Empresa" name="empresa" error={errors["empresa"]} />
+            <Field label="Cargo" name="cargo" error={errors["cargo"]} />
+            <Field label="Telefone" name="telefone" type="tel" error={errors["telefone"]} />
           </div>
-          <Field label="E-mail corporativo" name="email" type="email" error={errors.email} />
+          <Field label="E-mail corporativo" name="email" type="email" error={errors["email"]} />
           <div className="grid gap-2">
             <Label htmlFor="mensagem">Como podemos ajudar? (opcional)</Label>
             <Textarea id="mensagem" name="mensagem" rows={3} maxLength={600} />
@@ -88,7 +88,7 @@ function Field({
   label: string;
   name: string;
   type?: string;
-  error?: string;
+  error?: string | undefined;
 }) {
   return (
     <div className="grid gap-2">
