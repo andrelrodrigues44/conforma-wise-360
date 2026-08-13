@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import ogAsset from "@/assets/og-conforma360.jpg.asset.json";
 import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
 import { Results } from "@/components/site/Results";
@@ -24,8 +25,12 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: SITE_URL },
+      { property: "og:image", content: OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
+    links: [{ rel: "canonical", href: SITE_URL }],
   }),
   component: Index,
 });
