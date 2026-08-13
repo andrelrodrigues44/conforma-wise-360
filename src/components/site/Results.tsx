@@ -11,15 +11,17 @@ function useCountUp(target: number | null, active: boolean) {
   const [value, setValue] = useState(0);
   useEffect(() => {
     if (!active || target === null) return;
-    let frame = 0;
-    const total = 48;
-    const id = window.setInterval(() => {
-      frame += 1;
-      const p = 1 - Math.pow(1 - frame / total, 3);
-      setValue(Math.round(target * p));
-      if (frame >= total) window.clearInterval(id);
-    }, 16);
-    return () => window.clearInterval(id);
+    const duration = 1200;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / duration);
+      setValue(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else setValue(target);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [target, active]);
   return value;
 }
@@ -44,6 +46,15 @@ export function Results() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setActive(true);
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setActive(true);
+      return;
+    }
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
@@ -51,7 +62,7 @@ export function Results() {
           obs.disconnect();
         }
       },
-      { threshold: 0.3 },
+      { threshold: 0, rootMargin: "0px 0px -80px 0px" },
     );
     obs.observe(el);
     return () => obs.disconnect();
