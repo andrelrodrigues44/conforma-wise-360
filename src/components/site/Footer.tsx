@@ -68,21 +68,22 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-bold text-graphite">Institucional</h3>
             <ul className="mt-4 grid gap-3 text-sm text-muted-foreground">
-              <li>
-                <a href="#modulos" className="hover:text-primary">
-                  Política de Privacidade
-                </a>
-              </li>
-              <li>
-                <a href="#modulos" className="hover:text-primary">
-                  LGPD
-                </a>
-              </li>
-              <li>
-                <a href="#modulos" className="hover:text-primary">
-                  Termos de Uso
-                </a>
-              </li>
+              {[
+                { label: "Política de Privacidade", href: "https://www.aemconsult.com.br/politica-de-privacidade" },
+                { label: "LGPD", href: "https://www.aemconsult.com.br/politica-de-privacidade" },
+                { label: "Termos de Uso", href: "https://www.aemconsult.com.br/politica-de-privacidade" },
+              ].map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="hover:text-primary"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
