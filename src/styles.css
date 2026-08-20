@@ -61,10 +61,22 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  --color-safety: var(--safety);
+  --color-safety-soft: var(--safety-soft);
+  --color-health: var(--health);
+  --color-health-soft: var(--health-soft);
+  --color-env: var(--env);
+  --color-env-soft: var(--env-soft);
+  --color-legal: var(--legal);
+  --color-legal-soft: var(--legal-soft);
+  --color-mgmt: var(--mgmt);
+  --color-mgmt-soft: var(--mgmt-soft);
+
   --shadow-soft: var(--shadow-soft);
   --shadow-card: var(--shadow-card);
   --shadow-elevated: var(--shadow-elevated);
 }
+
 
 :root {
   --radius: 0.875rem;
@@ -98,6 +110,19 @@
   /* #2C2C2C */
   --graphite: oklch(0.284 0 0);
   --surface: oklch(0.972 0.004 247.9);
+
+  /* Cores de apoio por área */
+  --safety: oklch(0.5 0.13 250);
+  --safety-soft: oklch(0.962 0.02 250);
+  --health: oklch(0.53 0.16 15);
+  --health-soft: oklch(0.964 0.02 15);
+  --env: oklch(0.503 0.126 152.5);
+  --env-soft: oklch(0.958 0.018 152);
+  --legal: oklch(0.47 0.075 215);
+  --legal-soft: oklch(0.958 0.016 215);
+  --mgmt: oklch(0.48 0.13 295);
+  --mgmt-soft: oklch(0.962 0.02 295);
+
 
   --border: oklch(0.916 0.006 250);
   --input: oklch(0.916 0.006 250);
