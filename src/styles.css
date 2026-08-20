@@ -61,10 +61,22 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  --color-safety: var(--safety);
+  --color-safety-soft: var(--safety-soft);
+  --color-health: var(--health);
+  --color-health-soft: var(--health-soft);
+  --color-env: var(--env);
+  --color-env-soft: var(--env-soft);
+  --color-legal: var(--legal);
+  --color-legal-soft: var(--legal-soft);
+  --color-mgmt: var(--mgmt);
+  --color-mgmt-soft: var(--mgmt-soft);
+
   --shadow-soft: var(--shadow-soft);
   --shadow-card: var(--shadow-card);
   --shadow-elevated: var(--shadow-elevated);
 }
+
 
 :root {
   --radius: 0.875rem;
