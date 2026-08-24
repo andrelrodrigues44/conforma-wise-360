@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as PrecosRouteImport } from './routes/precos'
 import { Route as BlogSlugRouteImport } from './routes/blog_.$slug'
+import { Route as ApiPublicCapturarLeadSiteRouteImport } from './routes/api/public/capturar-lead-site'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,26 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCapturarLeadSiteRoute =
+  ApiPublicCapturarLeadSiteRouteImport.update({
+    id: '/api/public/capturar-lead-site',
+    path: '/api/public/capturar-lead-site',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
   '/precos': typeof PrecosRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/api/public/capturar-lead-site': typeof ApiPublicCapturarLeadSiteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
   '/precos': typeof PrecosRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/api/public/capturar-lead-site': typeof ApiPublicCapturarLeadSiteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +62,22 @@ export interface FileRoutesById {
   '/blog': typeof BlogRoute
   '/precos': typeof PrecosRoute
   '/blog_/$slug': typeof BlogSlugRoute
+  '/api/public/capturar-lead-site': typeof ApiPublicCapturarLeadSiteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/blog' | '/precos' | '/blog/$slug'
+  fullPaths:
+    '/' | '/blog' | '/precos' | '/blog/$slug' | '/api/public/capturar-lead-site'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/blog' | '/precos' | '/blog/$slug'
-  id: '__root__' | '/' | '/blog' | '/precos' | '/blog_/$slug'
+  to:
+    '/' | '/blog' | '/precos' | '/blog/$slug' | '/api/public/capturar-lead-site'
+  id:
+    | '__root__'
+    | '/'
+    | '/blog'
+    | '/precos'
+    | '/blog_/$slug'
+    | '/api/public/capturar-lead-site'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +85,7 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRoute
   PrecosRoute: typeof PrecosRoute
   BlogSlugRoute: typeof BlogSlugRoute
+  ApiPublicCapturarLeadSiteRoute: typeof ApiPublicCapturarLeadSiteRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +118,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/capturar-lead-site': {
+      id: '/api/public/capturar-lead-site'
+      path: '/api/public/capturar-lead-site'
+      fullPath: '/api/public/capturar-lead-site'
+      preLoaderRoute: typeof ApiPublicCapturarLeadSiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +133,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRoute,
   PrecosRoute: PrecosRoute,
   BlogSlugRoute: BlogSlugRoute,
+  ApiPublicCapturarLeadSiteRoute: ApiPublicCapturarLeadSiteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
