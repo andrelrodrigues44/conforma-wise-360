@@ -68,20 +68,9 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-bold text-graphite">Institucional</h3>
             <ul className="mt-4 grid gap-3 text-sm text-muted-foreground">
-              {[
-                { label: "Política de Privacidade", href: "https://www.aemconsult.com.br/politica-de-privacidade" },
-                { label: "LGPD", href: "https://www.aemconsult.com.br/politica-de-privacidade" },
-                { label: "Termos de Uso", href: "https://www.aemconsult.com.br/politica-de-privacidade" },
-              ].map((item) => (
-                <li key={item.label}>
-                  <a
-                    href={item.href}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="hover:text-primary"
-                  >
-                    {item.label}
-                  </a>
+              {["Política de Privacidade", "LGPD", "Termos de Uso"].map((label) => (
+                <li key={label} title="Em breve">
+                  {label}
                 </li>
               ))}
             </ul>
@@ -89,7 +78,7 @@ export function Footer() {
         </div>
 
         <p className="mt-10 border-t border-border pt-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Conforma360 · AEM Consult. Todos os direitos reservados.
+          © {new Date().getFullYear()} Conforma360. Todos os direitos reservados.
         </p>
       </div>
     </footer>

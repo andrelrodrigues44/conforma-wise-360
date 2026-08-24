@@ -13,8 +13,8 @@ import { Diagnostic } from "@/components/site/Diagnostic";
 import { FinalCta } from "@/components/site/FinalCta";
 import { Footer } from "@/components/site/Footer";
 
-const SITE_URL = "https://conforma-wise-360.lovable.app/";
-const OG_IMAGE = `https://conforma-wise-360.lovable.app${ogAsset.url}`;
+const SITE_URL = "https://www.conforma360.com.br/";
+const OG_IMAGE = `https://www.conforma360.com.br${ogAsset.url}`;
 const title = "Conforma360 | Gestão de Meio Ambiente, SST, Compliance e ESG";
 const description =
   "Plataforma integrada de Meio Ambiente, SST, Compliance Legal, ESG e Operações. Reduza riscos, automatize processos e decida com dados em tempo real.";

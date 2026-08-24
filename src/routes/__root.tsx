@@ -13,7 +13,6 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 
-
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -81,7 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Conforma360" },
       { name: "description", content: "Gestão integrada de Meio Ambiente, SST, Compliance e ESG." },
-      { name: "author", content: "AEM Consult" },
+      { name: "author", content: "Conforma360" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -106,11 +105,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Conforma360",
+  url: "https://www.conforma360.com.br",
+  logo: "https://www.conforma360.com.br/favicon.png",
+  description: "Plataforma integrada de Meio Ambiente, SST, Compliance Legal, ESG e Operações.",
+  email: "contato@conforma360.com.br",
+  telephone: "+5531992293261",
+  address: { "@type": "PostalAddress", addressCountry: "BR" },
+};
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
+        <script
+          type="application/ld+json"
+          // biome-ignore lint: dado estatico, sem input de usuario -- seguro
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
       </head>
       <body>
         {children}
@@ -131,4 +147,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-

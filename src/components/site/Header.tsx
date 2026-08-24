@@ -5,11 +5,11 @@ import { DemoDialog } from "./DemoDialog";
 import { Button } from "@/components/ui/button";
 
 const links = [
-  { href: "#solucoes", label: "Soluções" },
-  { href: "#modulos", label: "Módulos" },
-  { href: "#segmentos", label: "Segmentos" },
-  { href: "#beneficios", label: "Benefícios" },
-  { href: "#contato", label: "Contato" },
+  { href: "/#modulos", label: "Módulos" },
+  { href: "/precos", label: "Preços" },
+  { href: "/#segmentos", label: "Segmentos" },
+  { href: "/blog", label: "Blog" },
+  { href: "/#contato", label: "Contato" },
 ];
 
 export function Header() {
