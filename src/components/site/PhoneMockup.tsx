@@ -1,4 +1,4 @@
-import appMobile from "@/assets/app-mobile.png.asset.json";
+import appMobile from "@/assets/app-conforma360-mobile.png.asset.json";
 
 export function PhoneMockup({ className = "" }: { className?: string }) {
   return (
