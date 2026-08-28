@@ -267,11 +267,20 @@
 }
 
 @utility notebook-3d-inner {
-  transform: rotateY(-14deg) rotateX(4deg) rotateZ(0.6deg);
+  transform: rotateY(-18deg) rotateX(6deg) rotateZ(0.8deg);
   transform-style: preserve-3d;
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @utility notebook-3d-inner-hover {
-  transform: rotateY(-7deg) rotateX(2deg);
+  transform: rotateY(-9deg) rotateX(3deg);
+}
+
+.kb-wrap {
+  perspective: 900px;
+}
+
+.kb-deck {
+  transform: rotateX(45deg);
+  transform-style: preserve-3d;
 }
