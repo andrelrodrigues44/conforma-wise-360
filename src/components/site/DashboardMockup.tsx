@@ -4,7 +4,7 @@ const KEY_ROWS = [14, 14, 13, 12, 11];
 
 function KeyboardDeck() {
   return (
-    <div className="kb-deck relative mx-auto w-full origin-top rounded-b-[0.9rem] border border-white/10 bg-gradient-to-b from-[#242424] via-[#1b1b1b] to-[#101010] px-4 pb-4 pt-3 shadow-elevated sm:px-6 sm:pb-6 sm:pt-4">
+    <div className="kb-deck relative mx-auto w-[106%] origin-top -translate-x-[3%] rounded-b-[0.9rem] border border-white/10 bg-gradient-to-b from-[#242424] via-[#1b1b1b] to-[#101010] px-4 pb-5 pt-4 shadow-elevated sm:px-6 sm:pb-8 sm:pt-6">
       {/* Teclas */}
       <div className="space-y-1 sm:space-y-1.5">
         {KEY_ROWS.map((count, row) => (
@@ -46,7 +46,7 @@ export function DashboardMockup() {
 
       <div className="notebook-3d-inner group/nb hover:notebook-3d-inner-hover">
         {/* Tampa / tela do notebook */}
-        <div className="relative z-10 -mb-[4.5rem] rounded-t-[1.1rem] border border-graphite/25 bg-gradient-to-b from-graphite to-[#1b1b1b] p-[0.55rem] shadow-elevated sm:-mb-24 sm:rounded-t-[1.4rem] sm:p-3">
+        <div className="relative z-10 rounded-t-[1.1rem] border border-graphite/25 bg-gradient-to-b from-graphite to-[#1b1b1b] p-[0.55rem] shadow-elevated sm:rounded-t-[1.4rem] sm:p-3">
           <div className="relative overflow-hidden rounded-[0.6rem] bg-graphite ring-1 ring-white/10 sm:rounded-[0.8rem]">
             {/* Barra do sistema */}
             <div className="flex items-center gap-1.5 bg-[#101010] px-3 py-1.5">

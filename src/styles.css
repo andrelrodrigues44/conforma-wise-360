@@ -281,6 +281,6 @@
 }
 
 .kb-deck {
-  transform: rotateX(62deg);
+  transform: rotateX(45deg);
   transform-style: preserve-3d;
 }
