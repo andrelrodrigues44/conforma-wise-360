@@ -1,5 +1,43 @@
 import painel from "@/assets/painel-conforma360.png.asset.json";
 
+const KEY_ROWS = [14, 14, 13, 12, 11];
+
+function KeyboardDeck() {
+  return (
+    <div className="kb-deck relative mx-auto w-full origin-top rounded-b-[0.9rem] border border-white/10 bg-gradient-to-b from-[#242424] via-[#1b1b1b] to-[#101010] px-4 pb-4 pt-3 shadow-elevated sm:px-6 sm:pb-6 sm:pt-4">
+      {/* Teclas */}
+      <div className="space-y-1 sm:space-y-1.5">
+        {KEY_ROWS.map((count, row) => (
+          <div
+            key={row}
+            className="grid gap-[2px] sm:gap-[3px]"
+            style={{ gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))` }}
+          >
+            {Array.from({ length: count }).map((_, key) => (
+              <span
+                key={key}
+                className="h-[5px] rounded-[2px] bg-white/[0.07] ring-1 ring-white/[0.06] sm:h-[9px] sm:rounded-[3px]"
+              />
+            ))}
+          </div>
+        ))}
+        {/* Barra de espaço */}
+        <div className="grid grid-cols-12 gap-[2px] sm:gap-[3px]">
+          <span className="col-span-2 h-[5px] rounded-[2px] bg-white/[0.07] ring-1 ring-white/[0.06] sm:h-[9px]" />
+          <span className="col-span-8 h-[5px] rounded-[2px] bg-white/[0.07] ring-1 ring-white/[0.06] sm:h-[9px]" />
+          <span className="col-span-2 h-[5px] rounded-[2px] bg-white/[0.07] ring-1 ring-white/[0.06] sm:h-[9px]" />
+        </div>
+      </div>
+
+      {/* Trackpad */}
+      <div className="mx-auto mt-2.5 h-4 w-[34%] rounded-[0.35rem] bg-white/[0.05] ring-1 ring-white/[0.08] sm:mt-4 sm:h-6" />
+
+      {/* Borda frontal da base */}
+      <span className="absolute inset-x-0 bottom-0 h-[3px] rounded-b-[0.9rem] bg-gradient-to-b from-white/10 to-transparent sm:h-1" />
+    </div>
+  );
+}
+
 export function DashboardMockup() {
   return (
     <div className="notebook-3d relative">
@@ -8,7 +46,7 @@ export function DashboardMockup() {
 
       <div className="notebook-3d-inner group/nb hover:notebook-3d-inner-hover">
         {/* Tampa / tela do notebook */}
-        <div className="rounded-t-[1.1rem] border border-graphite/25 bg-gradient-to-b from-graphite to-[#1b1b1b] p-[0.55rem] shadow-elevated sm:rounded-t-[1.4rem] sm:p-3">
+        <div className="relative z-10 -mb-[4.5rem] rounded-t-[1.1rem] border border-graphite/25 bg-gradient-to-b from-graphite to-[#1b1b1b] p-[0.55rem] shadow-elevated sm:-mb-24 sm:rounded-t-[1.4rem] sm:p-3">
           <div className="relative overflow-hidden rounded-[0.6rem] bg-graphite ring-1 ring-white/10 sm:rounded-[0.8rem]">
             {/* Barra do sistema */}
             <div className="flex items-center gap-1.5 bg-[#101010] px-3 py-1.5">
@@ -33,11 +71,13 @@ export function DashboardMockup() {
           </div>
         </div>
 
-        {/* Base do notebook */}
-        <div className="relative mx-auto h-3 w-[104%] -translate-x-[2%] rounded-b-[0.6rem] bg-gradient-to-b from-[#3a3a3a] to-[#1b1b1b] shadow-card sm:h-4">
-          <span className="absolute left-1/2 top-1 h-1 w-16 -translate-x-1/2 rounded-full bg-white/15 sm:top-1.5 sm:w-24" />
+        {/* Dobradiça + base com teclado em perspectiva */}
+        <div className="kb-wrap">
+          <KeyboardDeck />
         </div>
-        <div className="mx-auto h-2 w-[86%] rounded-b-full bg-graphite/20 blur-[4px]" />
+
+        {/* Sombra projetada */}
+        <div className="mx-auto -mt-2 h-3 w-[80%] rounded-b-full bg-graphite/25 blur-[8px] sm:h-4" />
       </div>
     </div>
   );
