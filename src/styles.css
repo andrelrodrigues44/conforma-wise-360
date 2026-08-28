@@ -261,3 +261,17 @@
     transform: scaleY(0.05);
   }
 }
+
+@utility notebook-3d {
+  perspective: 1800px;
+}
+
+@utility notebook-3d-inner {
+  transform: rotateY(-14deg) rotateX(4deg) rotateZ(0.6deg);
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@utility notebook-3d-inner-hover {
+  transform: rotateY(-7deg) rotateX(2deg);
+}
