@@ -3,6 +3,7 @@ import ogAsset from "@/assets/og-conforma360.jpg.asset.json";
 import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
 import { Results } from "@/components/site/Results";
+import { ConsultoriaPlataforma } from "@/components/site/ConsultoriaPlataforma";
 import { Modules } from "@/components/site/Modules";
 import { MobileSection } from "@/components/site/MobileSection";
 import { Dashboards } from "@/components/site/Dashboards";
@@ -15,9 +16,9 @@ import { Footer } from "@/components/site/Footer";
 
 const SITE_URL = "https://www.conforma360.com.br/";
 const OG_IMAGE = `https://www.conforma360.com.br${ogAsset.url}`;
-const title = "Conforma360 | Gestão de Meio Ambiente, SST, Compliance e ESG";
+const title = "Conforma360 | Consultoria e Plataforma de Gestão";
 const description =
-  "Plataforma integrada de Meio Ambiente, SST, Compliance Legal, ESG e Operações. Reduza riscos, automatize processos e decida com dados em tempo real.";
+  "Consultoria especializada e plataforma integrada para Meio Ambiente, SST, Compliance Legal, ESG e Operações.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -44,6 +45,7 @@ function Index() {
       <main>
         <Hero />
         <Results />
+        <ConsultoriaPlataforma />
         <Modules />
         <MobileSection />
         <Dashboards />
