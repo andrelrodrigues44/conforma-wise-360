@@ -1,0 +1,39 @@
+name: CONFORMA360 Marketing AI
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Segunda-feira, 10:00 BRT (13:00 UTC)
+    - cron: "0 13 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: conforma360-marketing-ai
+  cancel-in-progress: false
+
+jobs:
+  generate-campaign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate weekly campaign
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+        run: node scripts/marketing-ai.mjs
+
+      - name: Commit generated campaign
+        run: |
+          git config user.name "conforma360-marketing-ai[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add marketing/generated/
+          if git diff --cached --quiet; then
+            echo "Nenhum novo conteúdo para commitar."
+            exit 0
+          fi
+          git commit -m "chore(marketing): gera campanha semanal com IA"
+          git push
