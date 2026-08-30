@@ -1,16 +1,16 @@
 const apiKey = process.env.ANTHROPIC_API_KEY;
 const supabaseUrl = process.env.SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const marketingKey = process.env.SUPABASE_MARKETING_KEY;
 const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
 
-if (!apiKey || !supabaseUrl || !serviceRoleKey) {
+if (!apiKey || !supabaseUrl || !marketingKey) {
   console.log("Sales Engine: secrets incompletos; nenhuma ação externa foi executada.");
   process.exit(0);
 }
 
 const headers = {
-  apikey: serviceRoleKey,
-  Authorization: `Bearer ${serviceRoleKey}`,
+  apikey: marketingKey,
+  Authorization: `Bearer ${marketingKey}`,
   "Content-Type": "application/json",
 };
 
