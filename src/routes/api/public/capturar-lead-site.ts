@@ -127,7 +127,9 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
           const score = scoreLead(dados);
           const temp = temperatura(score);
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { data: lead, error: insertError } = await supabaseAdmin.from("leads_site").insert({
+          const db = supabaseAdmin as any;
+
+          const { data: lead, error: insertError } = await db.from("leads_site").insert({
             nome: dados.nome,
             empresa: dados.empresa,
             cargo: dados.cargo || null,
@@ -153,7 +155,7 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
           if (insertError) console.error("Erro ao gravar lead:", insertError);
 
           if (lead?.id) {
-            await supabaseAdmin.from("sales_activities").insert({
+            await db.from("sales_activities").insert({
               lead_id: lead.id,
               tipo: "captura",
               descricao: `Lead captado pelo site. Score ${score}/100 (${temp}). Linha: ${dados.linha_comercial}.`,
