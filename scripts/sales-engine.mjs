@@ -54,7 +54,10 @@ const response = await fetch("https://api.anthropic.com/v1/messages", {
   },
   body: JSON.stringify({
     model,
-    max_tokens: 8000,
+    max_tokens: 5000,
+    thinking: {
+      type: "disabled",
+    },
     output_config: {
       format: {
         type: "json_schema",
@@ -100,23 +103,35 @@ const response = await fetch("https://api.anthropic.com/v1/messages", {
 if (!response.ok) throw new Error(`Anthropic API ${response.status}: ${await response.text()}`);
 
 const result = await response.json();
-if (result.stop_reason === "refusal") {
+const stopReason = result.stop_reason || "unknown";
+const blocks = Array.isArray(result.content) ? result.content : [];
+
+if (stopReason === "refusal") {
   throw new Error("Anthropic recusou a geração do follow-up.");
 }
 
-const text = (result.content || [])
+const text = blocks
   .filter((block) => block.type === "text")
-  .map((block) => block.text)
+  .map((block) => block.text || "")
   .join("\n")
   .trim();
 
-if (!text) throw new Error("Anthropic retornou uma resposta vazia.");
+console.log(`Sales Engine: Anthropic stop_reason=${stopReason}, blocos=${blocks.length}, texto=${text.length} caracteres.`);
+
+if (!text) {
+  throw new Error(`Anthropic retornou resposta sem texto útil. stop_reason=${stopReason}; blocos=${JSON.stringify(blocks).slice(0, 2000)}`);
+}
 
 let parsed;
 try {
   parsed = JSON.parse(text);
 } catch (error) {
-  throw new Error(`Resposta estruturada da Anthropic não pôde ser interpretada como JSON: ${error.message}. Conteúdo recebido: ${text.slice(0, 500)}`);
+  const preview = text.slice(0, 2000);
+  throw new Error(`Resposta estruturada da Anthropic não pôde ser interpretada como JSON. stop_reason=${stopReason}; erro=${error.message}; conteúdo=${preview}`);
+}
+
+if (!parsed || !Array.isArray(parsed.followups)) {
+  throw new Error("Anthropic retornou JSON válido, mas sem a propriedade followups como array.");
 }
 
 const leadIds = new Set(leads.map((lead) => lead.id));
