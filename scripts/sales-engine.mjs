@@ -19,8 +19,20 @@ async function supabase(path, options = {}) {
     ...options,
     headers: { ...headers, ...(options.headers || {}) },
   });
-  if (!response.ok) throw new Error(`Supabase ${response.status}: ${await response.text()}`);
-  return response.status === 204 ? null : response.json();
+
+  const body = await response.text();
+
+  if (!response.ok) {
+    throw new Error(`Supabase ${response.status}: ${body || "resposta vazia"}`);
+  }
+
+  if (!body.trim()) return null;
+
+  try {
+    return JSON.parse(body);
+  } catch (error) {
+    throw new Error(`Supabase retornou JSON inválido. status=${response.status}; erro=${error.message}; conteúdo=${body.slice(0, 2000)}`);
+  }
 }
 
 const leads = await supabase(
