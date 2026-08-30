@@ -5,6 +5,7 @@ import { DemoDialog } from "./DemoDialog";
 import { Button } from "@/components/ui/button";
 
 const links = [
+  { href: "/#solucoes", label: "Soluções" },
   { href: "/#modulos", label: "Módulos" },
   { href: "/precos", label: "Preços" },
   { href: "/#segmentos", label: "Segmentos" },
@@ -46,8 +47,14 @@ export function Header() {
               {l.label}
             </a>
           ))}
+          <a
+            href="/marketing-ai"
+            className="ml-2 rounded-md px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+          >
+            Marketing AI
+          </a>
           <DemoDialog>
-            <Button className="ml-3 shadow-soft">Solicitar Demonstração</Button>
+            <Button className="ml-2 shadow-soft">Solicitar Demonstração</Button>
           </DemoDialog>
         </nav>
 
@@ -74,6 +81,13 @@ export function Header() {
                 {l.label}
               </a>
             ))}
+            <a
+              href="/marketing-ai"
+              onClick={() => setOpen(false)}
+              className="rounded-md px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10"
+            >
+              Marketing AI
+            </a>
           </nav>
           <DemoDialog>
             <Button className="mt-3 w-full">Solicitar Demonstração</Button>
