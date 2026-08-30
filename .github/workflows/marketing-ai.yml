@@ -24,6 +24,8 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+          SUPABASE_MARKETING_URL: ${{ secrets.SUPABASE_MARKETING_URL }}
+          SUPABASE_MARKETING_KEY: ${{ secrets.SUPABASE_MARKETING_KEY }}
         run: node scripts/marketing-ai.mjs
 
       - name: Commit generated campaign
