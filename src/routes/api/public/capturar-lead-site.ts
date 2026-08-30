@@ -83,8 +83,15 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
             mensagem: parsed.data.mensagem,
           };
 
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { error: insertError } = await supabaseAdmin.from("leads_site").insert({
+          // Chave anon/publicável -- segura de expor num app público. A
+          // gravação em leads_site é liberada só pra INSERT via RLS
+          // (20270103090000_leads_site_insercao_anonima.sql, no repo do
+          // Conforma360), sem nenhum acesso de leitura/escrita adicional.
+          // NUNCA usar a service_role key aqui -- ela ignora todo o RLS do
+          // banco de produção do SaaS, exposição desproporcional pra um
+          // formulário de lead público.
+          const { supabase } = await import("@/integrations/supabase/client");
+          const { error: insertError } = await supabase.from("leads_site").insert({
             nome: dados.nome,
             empresa: dados.empresa,
             cargo: dados.cargo || null,
