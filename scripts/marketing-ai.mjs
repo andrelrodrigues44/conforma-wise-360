@@ -3,9 +3,11 @@ import path from "node:path";
 
 const apiKey = process.env.ANTHROPIC_API_KEY;
 const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
+const supabaseUrl = process.env.SUPABASE_MARKETING_URL;
+const marketingKey = process.env.SUPABASE_MARKETING_KEY;
 
-if (!apiKey) {
-  console.error("ANTHROPIC_API_KEY não configurada. A automação foi interrompida sem alterar arquivos.");
+if (!apiKey || !supabaseUrl || !marketingKey) {
+  console.error("Secrets incompletos: ANTHROPIC_API_KEY, SUPABASE_MARKETING_URL e SUPABASE_MARKETING_KEY são obrigatórios.");
   process.exit(1);
 }
 
@@ -24,50 +26,61 @@ Gerar demanda qualificada e vendas B2B no Brasil para duas linhas complementares
 PRIORIDADES DE MERCADO
 Priorize mineração, indústria, empresas com múltiplas unidades, operações complexas e organizações que precisam demonstrar conformidade e controle.
 
-REGRA DE CONTEÚDO
-Distribua a semana entre dor/risco, educação, autoridade/prova, produto/demonstração e conversão. Todo conteúdo precisa ter público, objetivo, canal, CTA e métrica. O conteúdo deve conduzir o leitor para uma ação comercial concreta: solicitar consultoria, diagnóstico, demonstração ou falar com a Conforma360.
+ESTRATÉGIA
+Distribua os 5 dias úteis entre dor/risco, educação, autoridade/prova, produto/demonstração e conversão. Cada conteúdo precisa ter público, objetivo, canal, CTA e métrica. A semana deve conduzir o público para consultoria, diagnóstico, demonstração ou conversa comercial.
 
 TOM
 Português do Brasil. Técnico, objetivo, premium, claro e comercialmente responsável. Evite conteúdo genérico, frases vazias e promessas absolutas.
 
-Crie a campanha da próxima semana em Markdown exatamente nesta estrutura:
-# Campanha semanal — ${data}
-## Objetivo comercial
-## Público prioritário
-## Oferta principal
-## Estratégia de aquisição
-Explique como a semana deve gerar atenção, leads e oportunidades.
-## Calendário
-Para cada dia útil, crie:
-- Canal
-- Linha comercial (Consultoria ou Plataforma)
-- Tema
-- Dor ou oportunidade
-- Objetivo
-- Headline
-- Legenda completa
-- CTA
-- Ideia de criativo
-- Métrica principal
-## Ativos de conversão
-Crie 2 ideias de oferta/lead magnet que possam gerar leads sem inventar certificações, resultados ou dados.
-## Sequência de follow-up
-Crie 3 mensagens curtas para leads que demonstraram interesse, separando quando fizer sentido consultoria e plataforma.
-## Hipóteses de teste
-Liste 3 testes A/B com hipótese, variável e métrica.
-## Próximas ações comerciais
-Liste as 5 ações que devem ser executadas após a campanha.
-## Critérios de aprovação
-Liste verificações antes de qualquer publicação.
-
-REGRAS DE SEGURANÇA E CREDIBILIDADE
+REGRAS DE SEGURANÇA
 - Não invente clientes, cases, resultados, certificações, integrações, números, depoimentos ou funcionalidades.
 - Não prometa conformidade garantida, ausência de multas ou resultados financeiros.
 - Não apresente requisito legal como aconselhamento jurídico individual.
 - Quando mencionar legislação, indique que a aplicabilidade deve ser validada conforme o contexto da organização.
 - Não publicar automaticamente em redes sociais nesta etapa; gerar conteúdo para revisão/aprovação.
-- Sempre distinguir claramente Consultoria de Plataforma.
-`;
+- Sempre distinguir Consultoria de Plataforma.
+
+Gere a campanha da próxima semana. Retorne SOMENTE um objeto compatível com o schema solicitado.`;
+
+const schema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    objetivo_comercial: { type: "string" },
+    publico_prioritario: { type: "string" },
+    oferta_principal: { type: "string" },
+    estrategia_aquisicao: { type: "string" },
+    dias: {
+      type: "array",
+      minItems: 5,
+      maxItems: 5,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          dia: { type: "string" },
+          canal: { type: "string", enum: ["linkedin", "instagram", "email", "blog", "whatsapp"] },
+          linha_comercial: { type: "string", enum: ["consultoria", "plataforma", "ambos"] },
+          tema: { type: "string" },
+          dor_oportunidade: { type: "string" },
+          objetivo: { type: "string" },
+          headline: { type: "string" },
+          legenda: { type: "string" },
+          cta: { type: "string" },
+          criativo: { type: "string" },
+          metrica: { type: "string" },
+        },
+        required: ["dia", "canal", "linha_comercial", "tema", "dor_oportunidade", "objetivo", "headline", "legenda", "cta", "criativo", "metrica"],
+      },
+    },
+    ativos_conversao: { type: "array", minItems: 2, maxItems: 2, items: { type: "string" } },
+    followups: { type: "array", minItems: 3, maxItems: 3, items: { type: "string" } },
+    testes_ab: { type: "array", minItems: 3, maxItems: 3, items: { type: "string" } },
+    proximas_acoes: { type: "array", minItems: 5, maxItems: 5, items: { type: "string" } },
+    criterios_aprovacao: { type: "array", minItems: 4, maxItems: 8, items: { type: "string" } },
+  },
+  required: ["objetivo_comercial", "publico_prioritario", "oferta_principal", "estrategia_aquisicao", "dias", "ativos_conversao", "followups", "testes_ab", "proximas_acoes", "criterios_aprovacao"],
+};
 
 const response = await fetch("https://api.anthropic.com/v1/messages", {
   method: "POST",
@@ -78,26 +91,105 @@ const response = await fetch("https://api.anthropic.com/v1/messages", {
   },
   body: JSON.stringify({
     model,
-    max_tokens: 7000,
+    max_tokens: 9000,
+    thinking: { type: "disabled" },
+    output_config: { format: { type: "json_schema", schema } },
     messages: [{ role: "user", content: prompt }],
   }),
 });
 
-if (!response.ok) {
-  const body = await response.text();
-  throw new Error(`Anthropic API ${response.status}: ${body}`);
+if (!response.ok) throw new Error(`Anthropic API ${response.status}: ${await response.text()}`);
+const result = await response.json();
+const block = (result.content || []).find((item) => item.type === "text");
+if (!block?.text) throw new Error(`Anthropic não retornou conteúdo textual. stop_reason=${result.stop_reason || "unknown"}`);
+
+let campaign;
+try {
+  campaign = JSON.parse(block.text);
+} catch (error) {
+  throw new Error(`JSON da campanha inválido: ${error.message}`);
 }
 
-const result = await response.json();
-const text = (result.content || [])
-  .filter((block) => block.type === "text")
-  .map((block) => block.text)
-  .join("\n")
-  .trim();
+async function supabase(pathname, options = {}) {
+  const res = await fetch(`${supabaseUrl}/rest/v1/${pathname}`, {
+    ...options,
+    headers: {
+      apikey: marketingKey,
+      Authorization: `Bearer ${marketingKey}`,
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+  });
+  const body = await res.text();
+  if (!res.ok) throw new Error(`Supabase ${res.status}: ${body}`);
+  return body ? JSON.parse(body) : null;
+}
 
-if (!text) throw new Error("A API não retornou conteúdo textual.");
+const inserted = await supabase("marketing_campaigns?select=id", {
+  method: "POST",
+  headers: { Prefer: "return=representation" },
+  body: JSON.stringify({
+    nome: `Campanha semanal — ${data}`,
+    objetivo: campaign.objetivo_comercial,
+    linha_comercial: "ambos",
+    segmento: campaign.publico_prioritario,
+    periodo_inicio: data,
+    status: "rascunho",
+  }),
+});
+
+const campaignId = inserted?.[0]?.id;
+if (!campaignId) throw new Error("Supabase não retornou o ID da campanha criada.");
+
+for (const item of campaign.dias) {
+  await supabase("marketing_contents", {
+    method: "POST",
+    headers: { Prefer: "return=minimal" },
+    body: JSON.stringify({
+      campaign_id: campaignId,
+      canal: item.canal,
+      formato: "post",
+      linha_comercial: item.linha_comercial,
+      titulo: item.headline,
+      legenda: item.legenda,
+      cta: item.cta,
+      criativo_brief: `${item.tema}. Dor/oportunidade: ${item.dor_oportunidade}. Criativo: ${item.criativo}. Métrica: ${item.metrica}.`,
+      data_publicacao: null,
+      status: "revisar",
+    }),
+  });
+}
+
+const lines = [
+  `# Campanha semanal — ${data}`,
+  "## Objetivo comercial", campaign.objetivo_comercial,
+  "## Público prioritário", campaign.publico_prioritario,
+  "## Oferta principal", campaign.oferta_principal,
+  "## Estratégia de aquisição", campaign.estrategia_aquisicao,
+  "## Calendário",
+];
+
+campaign.dias.forEach((item, index) => {
+  lines.push(`### Dia ${index + 1} — ${item.dia}`);
+  lines.push(`- Canal: ${item.canal}`);
+  lines.push(`- Linha comercial: ${item.linha_comercial}`);
+  lines.push(`- Tema: ${item.tema}`);
+  lines.push(`- Dor ou oportunidade: ${item.dor_oportunidade}`);
+  lines.push(`- Objetivo: ${item.objetivo}`);
+  lines.push(`- Headline: ${item.headline}`);
+  lines.push(`- Legenda completa: ${item.legenda}`);
+  lines.push(`- CTA: ${item.cta}`);
+  lines.push(`- Ideia de criativo: ${item.criativo}`);
+  lines.push(`- Métrica principal: ${item.metrica}`);
+});
+
+lines.push("## Ativos de conversão", ...campaign.ativos_conversao.map((x) => `- ${x}`));
+lines.push("## Sequência de follow-up", ...campaign.followups.map((x) => `- ${x}`));
+lines.push("## Hipóteses de teste", ...campaign.testes_ab.map((x) => `- ${x}`));
+lines.push("## Próximas ações comerciais", ...campaign.proximas_acoes.map((x) => `- ${x}`));
+lines.push("## Critérios de aprovação", ...campaign.criterios_aprovacao.map((x) => `- ${x}`));
+lines.push("", "---", "Gerado automaticamente pelo CONFORMA360 Marketing AI.");
 
 await fs.mkdir(outputDir, { recursive: true });
-await fs.writeFile(outputFile, `${text}\n\n---\nGerado automaticamente pelo CONFORMA360 Marketing AI.\n`, "utf8");
-
-console.log(`Campanha gerada: ${outputFile}`);
+await fs.writeFile(outputFile, `${lines.join("\n")}\n`, "utf8");
+console.log(`Campanha gerada e persistida: ${outputFile} | campaign_id=${campaignId} | conteúdos=${campaign.dias.length}`);
