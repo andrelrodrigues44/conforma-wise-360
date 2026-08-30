@@ -33,19 +33,17 @@ if (!leads?.length) {
 }
 
 const prompt = `Você é o SDR IA da Conforma360.
-Gere rascunhos de follow-up para os leads abaixo.
+Gere um rascunho de follow-up para cada lead abaixo.
 
 OBJETIVO: avançar leads para diagnóstico de consultoria, demonstração da plataforma ou ambos.
 REGRAS: português do Brasil; técnico, humano e curto; não inventar informações; não prometer resultados; não enviar nada; produzir somente rascunhos para aprovação humana.
 
-Para cada lead, retorne um objeto com: lead_id, etapa_recomendada, canal, assunto, mensagem, justificativa.
-Canal deve ser email ou whatsapp.
-Etapa recomendada deve ser qualificacao, diagnostico ou demonstracao.
+Para cada lead, preencha: lead_id, etapa_recomendada, canal, assunto, mensagem, justificativa.
+Canal: email ou whatsapp.
+Etapa recomendada: qualificacao, diagnostico ou demonstracao.
 
 LEADS:
-${JSON.stringify(leads, null, 2)}
-
-Responda SOMENTE JSON válido no formato {"followups":[...]}.`;
+${JSON.stringify(leads, null, 2)}`;
 
 const response = await fetch("https://api.anthropic.com/v1/messages", {
   method: "POST",
@@ -56,7 +54,45 @@ const response = await fetch("https://api.anthropic.com/v1/messages", {
   },
   body: JSON.stringify({
     model,
-    max_tokens: 5000,
+    max_tokens: 8000,
+    output_config: {
+      format: {
+        type: "json_schema",
+        schema: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            followups: {
+              type: "array",
+              items: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  lead_id: { type: "string" },
+                  etapa_recomendada: {
+                    type: "string",
+                    enum: ["qualificacao", "diagnostico", "demonstracao"],
+                  },
+                  canal: { type: "string", enum: ["email", "whatsapp"] },
+                  assunto: { type: "string" },
+                  mensagem: { type: "string" },
+                  justificativa: { type: "string" },
+                },
+                required: [
+                  "lead_id",
+                  "etapa_recomendada",
+                  "canal",
+                  "assunto",
+                  "mensagem",
+                  "justificativa",
+                ],
+              },
+            },
+          },
+          required: ["followups"],
+        },
+      },
+    },
     messages: [{ role: "user", content: prompt }],
   }),
 });
@@ -64,18 +100,27 @@ const response = await fetch("https://api.anthropic.com/v1/messages", {
 if (!response.ok) throw new Error(`Anthropic API ${response.status}: ${await response.text()}`);
 
 const result = await response.json();
+if (result.stop_reason === "refusal") {
+  throw new Error("Anthropic recusou a geração do follow-up.");
+}
+
 const text = (result.content || [])
   .filter((block) => block.type === "text")
   .map((block) => block.text)
   .join("\n")
   .trim();
 
-const start = text.indexOf("{");
-const end = text.lastIndexOf("}");
-if (start < 0 || end < start) throw new Error("Resposta da IA não contém JSON válido.");
+if (!text) throw new Error("Anthropic retornou uma resposta vazia.");
 
-const parsed = JSON.parse(text.slice(start, end + 1));
+let parsed;
+try {
+  parsed = JSON.parse(text);
+} catch (error) {
+  throw new Error(`Resposta estruturada da Anthropic não pôde ser interpretada como JSON: ${error.message}. Conteúdo recebido: ${text.slice(0, 500)}`);
+}
+
 const leadIds = new Set(leads.map((lead) => lead.id));
+let created = 0;
 
 for (const item of parsed.followups || []) {
   if (!leadIds.has(item.lead_id) || !item.mensagem) continue;
@@ -103,6 +148,8 @@ for (const item of parsed.followups || []) {
       descricao: `Rascunho de follow-up gerado pela IA. Canal: ${item.canal}. Etapa sugerida: ${item.etapa_recomendada}.`,
     }),
   });
+
+  created += 1;
 }
 
-console.log(`Sales Engine: ${parsed.followups?.length || 0} rascunhos processados para aprovação.`);
+console.log(`Sales Engine: ${created} rascunhos processados para aprovação.`);
