@@ -124,15 +124,22 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
             consentimento_marketing: parsed.data.consentimento_marketing,
           };
 
-          // Chave anon/publicável -- segura de expor num app público. A
-          // gravação em leads_site é liberada só pra INSERT via RLS
+          const score = scoreLead(dados);
+          const temp = temperatura(score);
+          // Chave anon/publicável -- segura de expor num app público.
+          // leads_site/sales_activities liberam só INSERT pra anon via RLS
           // (20270103090000_leads_site_insercao_anonima.sql, no repo do
-          // Conforma360), sem nenhum acesso de leitura/escrita adicional.
-          // NUNCA usar a service_role key aqui -- ela ignora todo o RLS do
-          // banco de produção do SaaS, exposição desproporcional pra um
-          // formulário de lead público.
+          // Conforma360), sem SELECT/UPDATE/DELETE. NUNCA usar service_role
+          // aqui -- ela ignora todo o RLS do banco de produção do SaaS,
+          // exposição desproporcional pra um formulário público. Gera o id
+          // no cliente (em vez de `.select().single()` no retorno) porque
+          // ler o registro de volta exigiria permissão de SELECT pra anon,
+          // que não é necessária pra esse fluxo.
+          const leadId = crypto.randomUUID();
           const { supabase } = await import("@/integrations/supabase/client");
+
           const { error: insertError } = await supabase.from("leads_site").insert({
+            id: leadId,
             nome: dados.nome,
             empresa: dados.empresa,
             cargo: dados.cargo || null,
@@ -153,13 +160,13 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
             consentimento_marketing: dados.consentimento_marketing,
             ip: request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for"),
             user_agent: request.headers.get("user-agent"),
-          }).select("id").single();
+          });
 
-          if (insertError) console.error("Erro ao gravar lead:", insertError);
-
-          if (lead?.id) {
-            await db.from("sales_activities").insert({
-              lead_id: lead.id,
+          if (insertError) {
+            console.error("Erro ao gravar lead:", insertError);
+          } else {
+            await supabase.from("sales_activities").insert({
+              lead_id: leadId,
               tipo: "captura",
               descricao: `Lead captado pelo site. Score ${score}/100 (${temp}). Linha: ${dados.linha_comercial}.`,
             });
@@ -187,7 +194,7 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
             console.error("ZEPTOMAIL_TOKEN / ZEPTOMAIL_FROM_ADDRESS não configurados — lead gravado, sem e-mail.");
           }
 
-          return json({ ok: true, lead_id: lead?.id ?? null, score, temperatura: temp });
+          return json({ ok: true, lead_id: insertError ? null : leadId, score, temperatura: temp });
         } catch (e) {
           console.error(e);
           return json({ error: "Erro interno" }, 500);
