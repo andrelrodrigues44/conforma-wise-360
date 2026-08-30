@@ -1,5 +1,5 @@
 const apiKey = process.env.ANTHROPIC_API_KEY;
-const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseUrl = process.env.SUPABASE_MARKETING_URL;
 const marketingKey = process.env.SUPABASE_MARKETING_KEY;
 const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
 
