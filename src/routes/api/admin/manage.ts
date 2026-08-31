@@ -7,7 +7,7 @@ function getSession(request: Request) {
   const cookie = request.headers.get("cookie") || "";
   const match = cookie.match(new RegExp(`${COOKIE_NAME}=([^;]+)`));
   if (!match) return null;
-  const [value, signature] = decodeURIComponent(match[1]).split(".");
+  const [value, signature] = decodeURIComponent(match[1] ?? "").split(".");
   return value && signature ? { value, signature } : null;
 }
 
