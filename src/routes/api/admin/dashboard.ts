@@ -24,26 +24,39 @@ async function sessionValid(request: Request) {
   return session.signature.length === expected.length && session.signature === expected;
 }
 
+function headers(key: string) {
+  return { apikey: key, Authorization: `Bearer ${key}`, Accept: "application/json" };
+}
+
 async function getTable(table: string, query: string) {
   const url = process.env["MARKETING_SUPABASE_URL"];
   const key = process.env["MARKETING_SUPABASE_KEY"];
   if (!url || !key) throw new Error("Supabase Marketing não configurado no servidor.");
-  const response = await fetch(`${url}/rest/v1/${table}?${query}`, { headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: "application/json" } });
+  const response = await fetch(`${url}/rest/v1/${table}?${query}`, { headers: headers(key) });
   if (!response.ok) throw new Error(`Supabase ${table}: ${response.status}`);
   return response.json();
 }
 
 async function getContents(url: string, key: string) {
   const base = `${url}/rest/v1/marketing_contents`;
-  const headers = { apikey: key, Authorization: `Bearer ${key}`, Accept: "application/json" };
+  const requestHeaders = headers(key);
   const full = `${base}?select=id,campaign_id,canal,formato,linha_comercial,titulo,legenda,cta,criativo_brief,criativo_url,criativo_alt,data_publicacao,status,created_at&order=created_at.desc&limit=100`;
-  const response = await fetch(full, { headers });
+  const response = await fetch(full, { headers: requestHeaders });
   if (response.ok) return response.json();
   if (response.status !== 400) throw new Error(`Supabase marketing_contents: ${response.status}`);
   const fallback = `${base}?select=id,campaign_id,canal,formato,linha_comercial,titulo,legenda,cta,criativo_brief,data_publicacao,status,created_at&order=created_at.desc&limit=100`;
-  const fallbackResponse = await fetch(fallback, { headers });
+  const fallbackResponse = await fetch(fallback, { headers: requestHeaders });
   if (!fallbackResponse.ok) throw new Error(`Supabase marketing_contents: ${fallbackResponse.status}`);
   return (await fallbackResponse.json()).map((item: Record<string, unknown>) => ({ ...item, criativo_url: null, criativo_alt: null }));
+}
+
+async function getCampaigns(url: string, key: string) {
+  const query = "select=id,nome,objetivo,linha_comercial,segmento,periodo_inicio,periodo_fim,status,created_at,updated_at&order=created_at.desc&limit=100";
+  const response = await fetch(`${url}/rest/v1/marketing_campaigns?${query}`, { headers: headers(key) });
+  if (response.ok) return response.json();
+  // Campanhas são um módulo complementar: uma falha dessa tabela não deve impedir o painel principal.
+  if ([400, 401, 403, 404, 406, 409, 422, 500, 502, 503].includes(response.status)) return [];
+  throw new Error(`Supabase marketing_campaigns: ${response.status}`);
 }
 
 export const Route = createFileRoute("/api/admin/dashboard")({
@@ -57,7 +70,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
         getTable("leads_site", "select=id,nome,empresa,cargo,linha_comercial,interesse,segmento,porte,unidades,score,temperatura,etapa,status,proxima_acao,proxima_acao_em,ultimo_contato_em,created_at&order=created_at.desc&limit=200"),
         getTable("sales_followups", "select=id,lead_id,etapa,canal,assunto,mensagem,agendado_para,enviado_em,status,created_at&order=created_at.desc&limit=200"),
         getContents(url, key),
-        getTable("marketing_campaigns", "select=id,nome,objetivo,linha_comercial,segmento,periodo_inicio,periodo_fim,status,created_at,updated_at&order=created_at.desc&limit=100"),
+        getCampaigns(url, key),
       ]);
       const countBy = (items: any[], keyName: string) => items.reduce((acc, item) => { const value = item[keyName] || "sem_classificacao"; acc[value] = (acc[value] || 0) + 1; return acc; }, {} as Record<string, number>);
       const stats = {
