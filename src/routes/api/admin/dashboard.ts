@@ -4,7 +4,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 const COOKIE_NAME = "conforma360_marketing_session";
 
 function sessionValid(request: Request) {
-  const secret = process.env["SUPABASE_MARKETING_KEY"] || "";
+  const secret = process.env["MARKETING_SUPABASE_KEY"] || "";
   const cookie = request.headers.get("cookie") || "";
   const match = cookie.match(new RegExp(`${COOKIE_NAME}=([^;]+)`));
   if (!secret || !match) return false;
@@ -19,8 +19,8 @@ function sessionValid(request: Request) {
 }
 
 async function getTable(table: string, query: string) {
-  const url = process.env["SUPABASE_MARKETING_URL"];
-  const key = process.env["SUPABASE_MARKETING_KEY"];
+  const url = process.env["MARKETING_SUPABASE_URL"];
+  const key = process.env["MARKETING_SUPABASE_KEY"];
   if (!url || !key) throw new Error("Supabase Marketing não configurado no servidor.");
   const response = await fetch(`${url}/rest/v1/${table}?${query}`, {
     headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: "application/json" },
