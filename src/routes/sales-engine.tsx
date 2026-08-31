@@ -14,6 +14,7 @@ import {
   Target,
   Users,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/sales-engine")({
   component: SalesEnginePage,
 });
 
-const stages = [
+const stages: Array<[string, string, string, LucideIcon]> = [
   ["Novos", "18", "Entrada e origem dos leads", Users],
   ["Qualificação", "11", "Contexto e necessidade", Target],
   ["Diagnóstico", "7", "Consultoria técnica", ShieldCheck],
@@ -72,12 +73,12 @@ function SalesEnginePage() {
             </div>
 
             <div className="mt-10 grid gap-4 md:grid-cols-4">
-              {[
+              {([
                 ["24", "Leads ativos", Users],
                 ["3", "Hot leads", Flame],
                 ["8", "Follow-ups pendentes", MessageSquareText],
                 ["2", "Oportunidades de venda", BarChart3],
-              ].map(([value, label, Icon]) => (
+              ] as Array<[string, string, LucideIcon]>).map(([value, label, Icon]) => (
                 <div key={String(label)} className="rounded-2xl border border-border bg-card p-5 shadow-soft">
                   <Icon className="h-5 w-5 text-primary" />
                   <p className="mt-4 text-3xl font-extrabold text-graphite">{value as string}</p>
@@ -171,11 +172,11 @@ function SalesEnginePage() {
         <section className="border-t border-border bg-surface px-5 py-14 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <div className="grid gap-5 md:grid-cols-3">
-              {[
+              {([
                 [Mail, "Follow-up assistido", "A IA prepara mensagens personalizadas por contexto e etapa do funil."],
                 [CheckCircle2, "Aprovação comercial", "Nada é enviado ou publicado automaticamente sem uma decisão controlada."],
                 [ShieldCheck, "Consultoria + Plataforma", "Cada oportunidade é direcionada para o caminho comercial mais adequado."],
-              ].map(([Icon, title, desc]) => (
+              ] as Array<[LucideIcon, string, string]>).map(([Icon, title, desc]) => (
                 <article key={String(title)} className="rounded-2xl border border-border bg-card p-6 shadow-soft">
                   <Icon className="h-5 w-5 text-primary" />
                   <h3 className="mt-4 font-bold text-graphite">{title as string}</h3>
