@@ -40,7 +40,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
       const [leads, followups, contents, campaigns] = await Promise.all([
         getTable("leads_site", "select=id,nome,empresa,cargo,linha_comercial,interesse,segmento,porte,unidades,score,temperatura,etapa,status,proxima_acao,proxima_acao_em,ultimo_contato_em,created_at&order=created_at.desc&limit=200"),
         getTable("sales_followups", "select=id,lead_id,etapa,canal,assunto,mensagem,agendado_para,enviado_em,status,created_at&order=created_at.desc&limit=200"),
-        getTable("marketing_contents", "select=id,campaign_id,canal,formato,linha_comercial,titulo,legenda,cta,criativo_brief,data_publicacao,status,created_at&order=created_at.desc&limit=100"),
+        getTable("marketing_contents", "select=id,campaign_id,canal,formato,linha_comercial,titulo,legenda,cta,criativo_brief,criativo_url,criativo_alt,data_publicacao,status,created_at&order=created_at.desc&limit=100"),
         getTable("marketing_campaigns", "select=id,nome,objetivo,linha_comercial,segmento,periodo_inicio,periodo_fim,status,created_at,updated_at&order=created_at.desc&limit=100"),
       ]);
       const countBy = (items: any[], key: string) => items.reduce((acc, item) => { const value = item[key] || "sem_classificacao"; acc[value] = (acc[value] || 0) + 1; return acc; }, {} as Record<string, number>);
