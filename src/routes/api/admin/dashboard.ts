@@ -33,17 +33,33 @@ async function getTable(table: string, query: string) {
   return response.json();
 }
 
+async function getContents(url: string, key: string) {
+  const base = `${url}/rest/v1/marketing_contents`;
+  const headers = { apikey: key, Authorization: `Bearer ${key}`, Accept: "application/json" };
+  const full = `${base}?select=id,campaign_id,canal,formato,linha_comercial,titulo,legenda,cta,criativo_brief,criativo_url,criativo_alt,data_publicacao,status,created_at&order=created_at.desc&limit=100`;
+  const response = await fetch(full, { headers });
+  if (response.ok) return response.json();
+  if (response.status !== 400) throw new Error(`Supabase marketing_contents: ${response.status}`);
+  const fallback = `${base}?select=id,campaign_id,canal,formato,linha_comercial,titulo,legenda,cta,criativo_brief,data_publicacao,status,created_at&order=created_at.desc&limit=100`;
+  const fallbackResponse = await fetch(fallback, { headers });
+  if (!fallbackResponse.ok) throw new Error(`Supabase marketing_contents: ${fallbackResponse.status}`);
+  return (await fallbackResponse.json()).map((item: Record<string, unknown>) => ({ ...item, criativo_url: null, criativo_alt: null }));
+}
+
 export const Route = createFileRoute("/api/admin/dashboard")({
   server: { handlers: { GET: async ({ request }) => {
     if (!(await sessionValid(request))) return new Response(JSON.stringify({ error: "Não autorizado." }), { status: 401, headers: { "Content-Type": "application/json" } });
     try {
+      const url = process.env["MARKETING_SUPABASE_URL"];
+      const key = process.env["MARKETING_SUPABASE_KEY"];
+      if (!url || !key) throw new Error("Supabase Marketing não configurado no servidor.");
       const [leads, followups, contents, campaigns] = await Promise.all([
         getTable("leads_site", "select=id,nome,empresa,cargo,linha_comercial,interesse,segmento,porte,unidades,score,temperatura,etapa,status,proxima_acao,proxima_acao_em,ultimo_contato_em,created_at&order=created_at.desc&limit=200"),
         getTable("sales_followups", "select=id,lead_id,etapa,canal,assunto,mensagem,agendado_para,enviado_em,status,created_at&order=created_at.desc&limit=200"),
-        getTable("marketing_contents", "select=id,campaign_id,canal,formato,linha_comercial,titulo,legenda,cta,criativo_brief,criativo_url,criativo_alt,data_publicacao,status,created_at&order=created_at.desc&limit=100"),
+        getContents(url, key),
         getTable("marketing_campaigns", "select=id,nome,objetivo,linha_comercial,segmento,periodo_inicio,periodo_fim,status,created_at,updated_at&order=created_at.desc&limit=100"),
       ]);
-      const countBy = (items: any[], key: string) => items.reduce((acc, item) => { const value = item[key] || "sem_classificacao"; acc[value] = (acc[value] || 0) + 1; return acc; }, {} as Record<string, number>);
+      const countBy = (items: any[], keyName: string) => items.reduce((acc, item) => { const value = item[keyName] || "sem_classificacao"; acc[value] = (acc[value] || 0) + 1; return acc; }, {} as Record<string, number>);
       const stats = {
         leads: leads.length,
         hot: leads.filter((l: any) => l.temperatura === "hot").length,
