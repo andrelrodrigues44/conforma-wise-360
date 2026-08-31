@@ -46,8 +46,14 @@ export const Route = createFileRoute("/api/admin/buffer")({
       GET: async ({ request }) => {
         if (!(await authorized(request))) return new Response(JSON.stringify({ error: "Não autorizado." }), { status: 401 });
         try {
-          const data = await bufferRequest(`query GetBufferAccount { account { organizations { id name channels { id name displayName service avatar isQueuePaused } } } }`);
-          return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+          const orgData = await bufferRequest(`query GetBufferOrganizations { account { organizations { id name } } }`);
+          const organizations = orgData?.account?.organizations ?? [];
+          const withChannels = [];
+          for (const organization of organizations) {
+            const channelData = await bufferRequest(`query GetBufferChannels($organizationId: String!) { channels(input: { organizationId: $organizationId }) { id name displayName service avatar isQueuePaused } }`, { organizationId: organization.id });
+            withChannels.push({ ...organization, channels: channelData?.channels ?? [] });
+          }
+          return new Response(JSON.stringify({ organizations: withChannels }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
         } catch (error) {
           return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Erro ao consultar o Buffer." }), { status: 500, headers: { "Content-Type": "application/json" } });
         }
@@ -55,9 +61,9 @@ export const Route = createFileRoute("/api/admin/buffer")({
       POST: async ({ request }) => {
         if (!(await authorized(request))) return new Response(JSON.stringify({ error: "Não autorizado." }), { status: 401 });
         try {
-          const body = await request.json() as { action?: "draft" | "schedule"; channelId?: string; text?: string; dueAt?: string; assetUrl?: string; service?: string };
+          const body = await request.json() as { action?: "draft" | "schedule"; channelId?: string; text?: string; dueAt?: string; assetUrl?: string };
           if (!body.channelId || !body.text) return new Response(JSON.stringify({ error: "channelId e text são obrigatórios." }), { status: 400 });
-          const assets = body.assetUrl ? [{ image: { url: body.assetUrl } }] : [];
+          if (body.action === "schedule" && !body.dueAt) return new Response(JSON.stringify({ error: "dueAt é obrigatório para agendamento." }), { status: 400 });
           const input: Record<string, unknown> = {
             channelId: body.channelId,
             text: body.text,
@@ -65,7 +71,7 @@ export const Route = createFileRoute("/api/admin/buffer")({
             mode: body.action === "schedule" ? "customScheduled" : "addToQueue",
             saveToDraft: body.action !== "schedule",
             aiAssisted: true,
-            assets,
+            assets: body.assetUrl ? [{ image: { url: body.assetUrl } }] : [],
           };
           if (body.action === "schedule") input.dueAt = body.dueAt;
           const data = await bufferRequest(`mutation CreateMarketingPost($input: CreatePostInput!) { createPost(input: $input) { ... on PostActionSuccess { post { id text dueAt status channelId } } ... on MutationError { message } ... on InvalidInputError { message } ... on UnauthorizedError { message } ... on UnexpectedError { message } } }`, { input });
