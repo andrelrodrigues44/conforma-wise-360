@@ -5,7 +5,7 @@ const COOKIE_NAME = "conforma360_marketing_session";
 const MAX_AGE = 60 * 60 * 8;
 
 function secret() {
-  return process.env["SUPABASE_MARKETING_KEY"] || "";
+  return process.env["MARKETING_SUPABASE_KEY"] || "";
 }
 
 function sign(value: string) {
