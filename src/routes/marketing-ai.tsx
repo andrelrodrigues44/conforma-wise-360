@@ -8,6 +8,7 @@ import {
   FileText,
   Instagram,
   Linkedin,
+  LockKeyhole,
   Megaphone,
   MessageSquareText,
   PenLine,
@@ -69,7 +70,9 @@ function MarketingAIPage() {
                   <Sparkles className="mr-2 h-4 w-4" /> Criar campanha com IA
                 </Button>
                 <Button asChild size="lg" variant="outline" className="h-12 px-7">
-                  <a href="/#contato">Falar com a Conforma360 <ArrowRight className="ml-2 h-4 w-4" /></a>
+                  <a href="/marketing-dashboard">
+                    <LockKeyhole className="mr-2 h-4 w-4" /> Acessar painel
+                  </a>
                 </Button>
               </div>
             </div>
@@ -201,7 +204,7 @@ function MarketingAIPage() {
                 </p>
               </div>
               <Button asChild variant="secondary" size="lg" className="shrink-0">
-                <a href="/#contato">Começar</a>
+                <a href="/marketing-dashboard">Abrir painel <ArrowRight className="ml-2 h-4 w-4" /></a>
               </Button>
             </div>
           </div>
