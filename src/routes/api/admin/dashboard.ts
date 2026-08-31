@@ -46,7 +46,7 @@ export const Route = createFileRoute("/api/admin/dashboard")({
           const [leads, followups, contents, campaigns, activities] = await Promise.all([
             getTable("leads_site", "select=id,nome,empresa,cargo,linha_comercial,interesse,segmento,porte,unidades,score,temperatura,etapa,status,proxima_acao,proxima_acao_em,ultimo_contato_em,created_at&order=created_at.desc&limit=200"),
             getTable("sales_followups", "select=id,lead_id,etapa,canal,assunto,mensagem,agendado_para,enviado_em,status,created_at&order=created_at.desc&limit=200"),
-            getTable("marketing_contents", "select=id,campaign_id,canal,formato,linha_comercial,titulo,cta,data_publicacao,status,created_at&order=created_at.desc&limit=100"),
+            getTable("marketing_contents", "select=id,campaign_id,canal,formato,linha_comercial,titulo,legenda,cta,criativo_brief,data_publicacao,status,created_at&order=created_at.desc&limit=100"),
             getTable("marketing_campaigns", "select=id,nome,objetivo,linha_comercial,segmento,periodo_inicio,periodo_fim,status,created_at,updated_at&order=created_at.desc&limit=100"),
             getTable("sales_activities", "select=id,lead_id,tipo,descricao,created_at&order=created_at.desc&limit=200"),
           ]);
@@ -58,6 +58,8 @@ export const Route = createFileRoute("/api/admin/dashboard")({
             open: leads.filter((l: any) => ["aberto", "em_contato"].includes(l.status)).length,
             pendingFollowups: followups.filter((f: any) => ["pendente", "aprovado", "agendado"].includes(f.status)).length,
             reviewContents: contents.filter((c: any) => c.status === "revisar").length,
+            approvedContents: contents.filter((c: any) => c.status === "aprovado").length,
+            rejectedContents: contents.filter((c: any) => c.status === "rejeitado").length,
             activeCampaigns: campaigns.filter((c: any) => ["ativa", "agendada"].includes(c.status)).length,
             conversionRate: leads.length ? Math.round((leads.filter((l: any) => l.status === "convertido").length / leads.length) * 1000) / 10 : 0,
             byLine: countBy(leads, "linha_comercial"), byStage: countBy(leads, "etapa"), byTemperature: countBy(leads, "temperatura"),
