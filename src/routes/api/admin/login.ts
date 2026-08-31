@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createHmac, timingSafeEqual } from "node:crypto";
 
 const COOKIE_NAME = "conforma360_marketing_session";
 const MAX_AGE = 60 * 60 * 8;
@@ -8,29 +7,38 @@ function secret() {
   return process.env["MARKETING_SUPABASE_KEY"] || "";
 }
 
-function sign(value: string) {
-  return createHmac("sha256", secret()).update(value).digest("hex");
+async function sign(value: string) {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret()),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(signature), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-function isValidSession(request: Request) {
+function getSessionValue(request: Request) {
   const cookie = request.headers.get("cookie") || "";
   const match = cookie.match(new RegExp(`${COOKIE_NAME}=([^;]+)`));
-  if (!match || !secret()) return false;
+  if (!match) return null;
   const [value, signature] = decodeURIComponent(match[1]).split(".");
-  if (!value || !signature) return false;
-  const expected = sign(value);
-  try {
-    return timingSafeEqual(Buffer.from(signature), Buffer.from(expected)) && value === "admin";
-  } catch {
-    return false;
-  }
+  return value && signature ? { value, signature } : null;
+}
+
+async function isValidSession(request: Request) {
+  const session = getSessionValue(request);
+  if (!session || !secret() || session.value !== "admin") return false;
+  const expected = await sign(session.value);
+  return session.signature.length === expected.length && session.signature === expected;
 }
 
 export const Route = createFileRoute("/api/admin/login")({
   server: {
     handlers: {
       GET: async ({ request }) =>
-        new Response(JSON.stringify({ authenticated: isValidSession(request) }), {
+        new Response(JSON.stringify({ authenticated: await isValidSession(request) }), {
           headers: { "Content-Type": "application/json" },
         }),
       POST: async ({ request }) => {
@@ -52,7 +60,7 @@ export const Route = createFileRoute("/api/admin/login")({
         }
 
         const value = "admin";
-        const cookie = `${COOKIE_NAME}=${encodeURIComponent(`${value}.${sign(value)}`)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${MAX_AGE}`;
+        const cookie = `${COOKIE_NAME}=${encodeURIComponent(`${value}.${await sign(value)}`)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${MAX_AGE}`;
         return new Response(JSON.stringify({ ok: true }), {
           headers: {
             "Content-Type": "application/json",
