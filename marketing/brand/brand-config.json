@@ -1,0 +1,28 @@
+{
+  "brand": "CONFORMA360",
+  "product": "CONFORMA360 Marketing AI",
+  "positioning": "Plataforma integrada de gestão de SSMA e Compliance, com inteligência aplicada para transformar dados, riscos e requisitos em ações, evidências e decisões.",
+  "logo": {
+    "sourceOfTruth": "logo-conforma360-oficial",
+    "mustUseOfficialAsset": true,
+    "allowRedesign": false,
+    "allowAiRecreation": false
+  },
+  "lines": {
+    "consultoria": {
+      "label": "Consultoria CONFORMA360",
+      "focus": ["Meio Ambiente", "SST", "Compliance", "requisitos legais", "licenciamento", "ISO 14001", "ISO 45001", "auditorias"]
+    },
+    "plataforma": {
+      "label": "Plataforma CONFORMA360",
+      "focus": ["SSMA", "requisitos legais", "documentos", "evidências", "inspeções", "planos de ação", "indicadores", "inteligência aplicada"]
+    }
+  },
+  "prioritySegments": ["mineração", "indústria", "empresas com múltiplas unidades", "operações complexas"],
+  "tone": ["técnico", "objetivo", "didático", "premium", "confiável", "comercialmente responsável"],
+  "preferredCtas": ["Solicitar demonstração", "Solicitar diagnóstico", "Conhecer a plataforma", "Falar sobre consultoria", "Falar com um especialista"],
+  "approval": {
+    "requiredBeforeExternalPublication": true,
+    "statuses": ["rascunho", "em_revisao", "aprovado", "agendado", "publicado"]
+  }
+}
