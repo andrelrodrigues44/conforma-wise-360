@@ -84,7 +84,7 @@ function MarketingAIPage() {
                 ["18", "Conteúdos no pipeline", FileText],
                 ["12", "Publicações agendadas", CalendarDays],
                 ["3,8%", "Conversão média", BarChart3],
-              ]. as Array<[string, string, LucideIcon]>)map(([value, label, Icon]: [string, string, LucideIcon]) => (
+              ] as Array<[string, string, LucideIcon]>).map(([value, label, Icon]) => (
                 <div key={String(label)} className="rounded-2xl border border-border bg-card p-5 shadow-soft">
                   <Icon className="h-5 w-5 text-primary" />
                   <p className="mt-4 text-3xl font-extrabold text-graphite">{value as string}</p>
@@ -160,7 +160,7 @@ function MarketingAIPage() {
                   [Linkedin, "LinkedIn: autoridade, geração de demanda e prospecção"],
                   [MessageSquareText, "Follow-up: mensagens orientadas por contexto"],
                   [Send, "Campanhas: calendário, CTA e distribuição"],
-                ]. as Array<[LucideIcon, string]>)map(([Icon, text]: [LucideIcon, string]) => (
+                ] as Array<[LucideIcon, string]>).map(([Icon, text]) => (
                   <div key={String(text)} className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
                     <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                     <span className="text-sm text-foreground/80">{text as string}</span>
