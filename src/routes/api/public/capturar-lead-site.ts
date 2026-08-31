@@ -120,7 +120,7 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
             interesse: parsed.data.interesse,
             segmento: parsed.data.segmento,
             porte: parsed.data.porte,
-            unidades: parsed.data.unidades,
+            ...(parsed.data.unidades !== undefined ? { unidades: parsed.data.unidades } : {}),
             consentimento_marketing: parsed.data.consentimento_marketing,
           };
 
@@ -136,7 +136,11 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
           // ler o registro de volta exigiria permissão de SELECT pra anon,
           // que não é necessária pra esse fluxo.
           const leadId = crypto.randomUUID();
-          const { supabase } = await import("@/integrations/supabase/client");
+          const { supabase: supabaseClient } = await import("@/integrations/supabase/client");
+          // Tabelas de CRM vivem no schema de marketing, fora dos tipos gerados.
+          const supabase = supabaseClient as unknown as {
+            from: (table: string) => { insert: (values: Record<string, unknown>) => Promise<{ error: unknown }> };
+          };
 
           const { error: insertError } = await supabase.from("leads_site").insert({
             id: leadId,

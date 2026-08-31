@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-type Row = Record<string, unknown>;
+type Row = { [k: string]: unknown } & Partial<Record<"agendado_para" | "assunto" | "campaign_id" | "canal" | "cargo" | "created_at" | "criativo_brief" | "cta" | "data_publicacao" | "email" | "empresa" | "enviado_em" | "etapa" | "formato" | "id" | "interesse" | "lead_id" | "legenda" | "linha_comercial" | "mensagem" | "nome" | "objetivo" | "periodo_fim" | "periodo_inicio" | "porte" | "proxima_acao" | "proxima_acao_em" | "score" | "segmento" | "status" | "telefone" | "temperatura" | "titulo" | "ultimo_contato_em" | "unidades", unknown>>;
 type Tab = "visao-geral" | "leads" | "conteudos" | "campanhas" | "followups";
 type DashboardData = { stats?: { leads?: number; hot?: number; warm?: number; open?: number; pendingFollowups?: number; reviewContents?: number; approvedContents?: number; rejectedContents?: number; activeCampaigns?: number; conversionRate?: number }; leads?: Row[]; followups?: Row[]; contents?: Row[]; campaigns?: Row[] };
 const tabs: Array<[Tab, string, typeof BarChart3]> = [["visao-geral", "Visão geral", BarChart3], ["leads", "Leads", Users], ["conteudos", "Conteúdos", FileText], ["campanhas", "Campanhas", Megaphone], ["followups", "Follow-ups", MessageSquareText]];
