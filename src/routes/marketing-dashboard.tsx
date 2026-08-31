@@ -1,33 +1,21 @@
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BarChart3, Bot, CheckCircle2, FileText, Flame, LogOut, Megaphone, MessageSquareText, RefreshCw, Target, Users, X } from "lucide-react";
+import { BarChart3, Bot, CheckCircle2, FileText, Flame, LogOut, Megaphone, MessageSquareText, Plus, RefreshCw, Save, Target, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+type Row = Record<string, unknown>;
+type Tab = "visao-geral" | "leads" | "conteudos" | "campanhas" | "followups";
+type DashboardData = { stats?: { leads?: number; hot?: number; warm?: number; open?: number; pendingFollowups?: number; reviewContents?: number; activeCampaigns?: number; conversionRate?: number }; leads?: Row[]; followups?: Row[]; contents?: Row[]; campaigns?: Row[] };
+const tabs: Array<[Tab, string, typeof BarChart3]> = [["visao-geral", "Visão geral", BarChart3], ["leads", "Leads", Users], ["conteudos", "Conteúdos", FileText], ["campanhas", "Campanhas", Megaphone], ["followups", "Follow-ups", MessageSquareText]];
+const text = (value: unknown) => value == null ? "" : String(value);
+const moneyLabel = (value: unknown) => value === "consultoria" ? "Consultoria" : value === "plataforma" ? "Plataforma" : "Ambos";
 
 export const Route = createFileRoute("/marketing-dashboard")({
   head: () => ({ meta: [{ title: "Centro de Marketing AI | Conforma360" }, { name: "description", content: "Painel privado de marketing, leads, campanhas e Sales Engine da Conforma360." }] }),
   component: MarketingDashboardPage,
 });
-
-type DashboardData = {
-  stats?: { leads?: number; hot?: number; warm?: number; open?: number; pendingFollowups?: number; reviewContents?: number; activeCampaigns?: number; conversionRate?: number };
-  leads?: Array<Record<string, any>>;
-  followups?: Array<Record<string, any>>;
-  contents?: Array<Record<string, any>>;
-  campaigns?: Array<Record<string, any>>;
-};
-
-const tabs = [
-  ["visao-geral", "Visão geral", BarChart3],
-  ["leads", "Leads", Users],
-  ["conteudos", "Conteúdos", FileText],
-  ["campanhas", "Campanhas", Megaphone],
-  ["followups", "Follow-ups", MessageSquareText],
-] as const;
-
-function moneyLabel(value: string) {
-  return value === "consultoria" ? "Consultoria" : value === "plataforma" ? "Plataforma" : "Ambos";
-}
 
 function MarketingDashboardPage() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -35,142 +23,41 @@ function MarketingDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<(typeof tabs)[number][0]>("visao-geral");
-
-  async function checkSession() {
-    try {
-      const response = await fetch("/api/admin/login", { credentials: "include" });
-      const json = await response.json().catch(() => ({}));
-      const ok = Boolean(json.authenticated);
-      setAuthenticated(ok);
-      return ok;
-    } catch {
-      setAuthenticated(false);
-      setError("Não foi possível verificar a sessão administrativa.");
-      return false;
-    }
-  }
+  const [tab, setTab] = useState<Tab>("visao-geral");
+  const [editing, setEditing] = useState<{ table: string; row: Row } | null>(null);
+  const [creating, setCreating] = useState<"content" | "campaign" | null>(null);
 
   async function loadDashboard() {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await fetch("/api/admin/dashboard", { credentials: "include" });
-      if (response.status === 401) {
-        setAuthenticated(false);
-        return;
-      }
-      const json = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(json.error || "Não foi possível carregar o painel.");
-      setData(json);
-      setAuthenticated(true);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao carregar o painel.");
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true); setError("");
+    try { const response = await fetch("/api/admin/dashboard", { credentials: "include" }); if (response.status === 401) { setAuthenticated(false); return; } const json = await response.json().catch(() => ({})); if (!response.ok) throw new Error(json.error || "Não foi possível carregar o painel."); setData(json); setAuthenticated(true); }
+    catch (e) { setError(e instanceof Error ? e.message : "Erro ao carregar o painel."); }
+    finally { setLoading(false); }
   }
+  useEffect(() => { fetch("/api/admin/login", { credentials: "include" }).then((r) => r.json()).then((j) => { const ok = Boolean(j.authenticated); setAuthenticated(ok); if (ok) void loadDashboard(); }).catch(() => { setAuthenticated(false); setError("Não foi possível verificar a sessão administrativa."); }); }, []);
+  async function login(event: FormEvent) { event.preventDefault(); setError(""); setLoading(true); try { const response = await fetch("/api/admin/login", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }) }); const json = await response.json().catch(() => ({})); if (!response.ok) throw new Error(json.error || "Não foi possível entrar."); setPassword(""); await loadDashboard(); } catch (e) { setError(e instanceof Error ? e.message : "Erro ao entrar."); } finally { setLoading(false); } }
+  async function logout() { await fetch("/api/admin/logout", { method: "POST", credentials: "include" }); setAuthenticated(false); setData(null); }
+  async function mutate(method: "POST" | "PATCH", table: string, id: string | undefined, values: Row) { setLoading(true); setError(""); try { const response = await fetch("/api/admin/manage", { method, credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ table, id, data: values }) }); const json = await response.json().catch(() => ({})); if (!response.ok) throw new Error(json.error || "Não foi possível salvar."); setEditing(null); setCreating(null); await loadDashboard(); } catch (e) { setError(e instanceof Error ? e.message : "Erro ao salvar."); } finally { setLoading(false); } }
 
-  useEffect(() => {
-    checkSession().then((ok) => {
-      if (ok) void loadDashboard();
-    });
-  }, []);
-
-  async function login(event: React.FormEvent) {
-    event.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const response = await fetch("/api/admin/login", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      const json = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(json.error || "Não foi possível entrar.");
-      setPassword("");
-      setAuthenticated(true);
-      await loadDashboard();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao entrar.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function logout() {
-    await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
-    setAuthenticated(false);
-    setData(null);
-  }
+  if (authenticated === null) return <div className="grid min-h-screen place-items-center bg-[#f5f7f6] text-sm text-muted-foreground">Carregando Centro de Marketing…</div>;
+  if (!authenticated) return <div className="min-h-screen bg-[#f5f7f6] px-5 py-10"><div className="mx-auto flex min-h-[80vh] max-w-md items-center justify-center"><div className="w-full rounded-3xl border border-border bg-white p-8 shadow-elevated"><div className="mb-8 flex items-center gap-3"><div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary text-white"><Bot className="h-6 w-6" /></div><div><p className="text-xs font-extrabold tracking-[0.16em] text-primary">CONFORMA360</p><h1 className="text-2xl font-extrabold">Marketing AI</h1></div></div><h2 className="text-xl font-bold">Centro privado</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">Acesse o comando de marketing, vendas, conteúdo e follow-ups.</p><form onSubmit={login} className="mt-7 space-y-4"><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha administrativa" autoComplete="current-password" />{error && <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}<Button type="submit" className="h-11 w-full" disabled={loading || !password}>{loading ? "Entrando…" : "Entrar no painel"}</Button></form><Link to="/" className="mt-6 block text-center text-xs font-semibold text-muted-foreground hover:text-primary">Voltar ao site</Link></div></div></div>;
 
   const stats = data?.stats;
-  const hotLeads = (data?.leads ?? []).filter((lead) => lead.temperatura === "hot");
+  const hotLeads = (data?.leads ?? []).filter((lead) => text(lead.temperatura) === "hot");
+  const suggestions = useMemo(() => { const ideas = ["Publicar conteúdo técnico de autoridade sobre conformidade legal e redução de riscos.", "Criar CTA direto para demonstração da plataforma Conforma360.", "Priorizar follow-up dos HOT leads antes de gerar novos contatos."]; if ((stats?.reviewContents ?? 0) > 0) ideas.unshift(`Revisar ${stats?.reviewContents} conteúdo(s) pendente(s) antes da próxima publicação.`); return ideas.slice(0, 4); }, [stats]);
 
-  if (authenticated === null) {
-    return <div className="grid min-h-screen place-items-center bg-[#f5f7f6] text-sm text-muted-foreground">Carregando Centro de Marketing…</div>;
-  }
-
-  if (!authenticated) {
-    return (
-      <div className="min-h-screen bg-[#f5f7f6] px-5 py-10">
-        <div className="mx-auto flex min-h-[80vh] max-w-md items-center justify-center">
-          <div className="w-full rounded-3xl border border-border bg-white p-8 shadow-elevated">
-            <div className="mb-8 flex items-center gap-3">
-              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary text-white"><Bot className="h-6 w-6" /></div>
-              <div><p className="text-xs font-extrabold tracking-[0.16em] text-primary">CONFORMA360</p><h1 className="text-2xl font-extrabold text-graphite">Marketing AI</h1></div>
-            </div>
-            <h2 className="text-xl font-bold text-graphite">Centro privado</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">Acesse o painel comercial, leads, conteúdos e follow-ups.</p>
-            <form onSubmit={login} className="mt-7 space-y-4">
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha administrativa" autoComplete="current-password" />
-              {error && <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="h-11 w-full" disabled={loading || !password}>{loading ? "Entrando…" : "Entrar no painel"}</Button>
-            </form>
-            <Link to="/" className="mt-6 block text-center text-xs font-semibold text-muted-foreground hover:text-primary">Voltar ao site</Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-[#f5f7f6] text-graphite">
-      <header className="sticky top-0 z-30 border-b border-border bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-[1500px] items-center justify-between px-5 lg:px-8">
-          <div className="flex items-center gap-3"><div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-white"><Bot className="h-5 w-5" /></div><div><p className="text-[10px] font-extrabold tracking-[0.18em] text-primary">CONFORMA360</p><p className="font-bold">Marketing AI</p></div></div>
-          <div className="flex items-center gap-2"><Button variant="outline" size="sm" onClick={() => void loadDashboard()} disabled={loading}><RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />Atualizar</Button><Button variant="ghost" size="sm" onClick={() => void logout()}><LogOut className="mr-2 h-4 w-4" />Sair</Button></div>
-        </div>
-      </header>
-      <main className="mx-auto max-w-[1500px] px-5 py-8 lg:px-8">
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div><p className="text-xs font-extrabold tracking-[0.2em] text-primary">CENTRO DE COMANDO</p><h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">Marketing & Sales Intelligence</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Uma operação integrada para vender as duas linhas da Conforma360: Consultoria e Plataforma.</p></div>
-          <div className="flex items-center gap-2 rounded-2xl border border-primary/15 bg-white px-4 py-3 text-xs font-semibold"><span className="h-2 w-2 rounded-full bg-primary" />Sales Engine conectado</div>
-        </div>
-        <nav className="mt-8 flex gap-1 overflow-x-auto rounded-2xl border border-border bg-white p-1.5 shadow-soft">
-          {tabs.map(([id, label, Icon]) => <button key={id} onClick={() => setTab(id)} className={`flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition ${tab === id ? "bg-primary text-white" : "text-muted-foreground hover:bg-surface hover:text-graphite"}`}><Icon className="h-4 w-4" />{label}</button>)}
-        </nav>
-        {error && <div className="mt-5 flex items-center justify-between rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive"><span>{error}</span><button onClick={() => setError("")}><X className="h-4 w-4" /></button></div>}
-        {tab === "visao-geral" && <>
-          <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {[["Leads ativos", stats?.open ?? 0, Users, "base comercial"], ["Hot leads", stats?.hot ?? 0, Flame, "prioridade máxima"], ["Follow-ups", stats?.pendingFollowups ?? 0, MessageSquareText, "fila de aprovação"], ["Conversão", `${stats?.conversionRate ?? 0}%`, Target, "leads convertidos"]].map(([label, value, Icon, note]) => <div key={String(label)} className="rounded-2xl border border-border bg-white p-5 shadow-soft"><div className="flex items-center justify-between"><div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div><span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{String(note)}</span></div><p className="mt-5 text-3xl font-extrabold">{String(value)}</p><p className="mt-1 text-sm text-muted-foreground">{String(label)}</p></div>)}
-          </section>
-          <section className="mt-6 grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
-            <div className="rounded-3xl border border-border bg-white p-6 shadow-soft"><div className="flex items-center justify-between"><div><p className="text-xs font-extrabold tracking-[0.16em] text-primary">OPORTUNIDADES</p><h2 className="mt-1 text-xl font-extrabold">Leads que merecem atenção</h2></div><Flame className="h-5 w-5 text-primary" /></div><div className="mt-5 divide-y divide-border">{hotLeads.slice(0, 6).map((lead) => <div key={lead.id} className="flex items-center justify-between gap-4 py-4"><div className="min-w-0"><p className="truncate font-bold">{lead.nome}</p><p className="mt-1 truncate text-xs text-muted-foreground">{lead.empresa} · {lead.cargo || "Cargo não informado"}</p></div><div className="flex items-center gap-3"><span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-extrabold text-primary">{lead.score}/100</span><span className="hidden rounded-full bg-surface px-2.5 py-1 text-xs font-semibold sm:inline">{moneyLabel(lead.linha_comercial)}</span></div></div>)}{hotLeads.length === 0 && <div className="py-10 text-center text-sm text-muted-foreground">Nenhum HOT no momento.</div>}</div></div>
-            <div className="rounded-3xl border border-border bg-white p-6 shadow-soft"><p className="text-xs font-extrabold tracking-[0.16em] text-primary">SAÚDE DA OPERAÇÃO</p><h2 className="mt-1 text-xl font-extrabold">Marketing → Vendas</h2><div className="mt-6 space-y-4">{[["Conteúdos para revisar", stats?.reviewContents ?? 0, FileText], ["Campanhas ativas", stats?.activeCampaigns ?? 0, Megaphone], ["Leads no funil", stats?.leads ?? 0, Users]].map(([label, value, Icon]) => <div key={String(label)} className="flex items-center justify-between rounded-2xl bg-surface p-4"><div className="flex items-center gap-3"><Icon className="h-4 w-4 text-primary" /><span className="text-sm font-semibold">{String(label)}</span></div><span className="text-xl font-extrabold">{String(value)}</span></div>)}</div><div className="mt-5 rounded-2xl border border-primary/15 bg-primary/5 p-4 text-xs leading-5 text-muted-foreground"><CheckCircle2 className="mb-2 h-4 w-4 text-primary" />A IA prepara conteúdo e follow-ups. Publicações e comunicações externas permanecem sob aprovação.</div></div>
-          </section>
-        </>}
-        {tab === "leads" && <DataList title="Leads" items={data?.leads ?? []} empty="Nenhum lead encontrado." render={(item) => <><p className="font-bold">{item.nome}</p><p className="text-xs text-muted-foreground">{item.empresa} · {item.cargo || "—"} · {moneyLabel(item.linha_comercial)}</p></>} />}
-        {tab === "conteudos" && <DataList title="Conteúdos" items={data?.contents ?? []} empty="Nenhum conteúdo criado." render={(item) => <><p className="font-bold">{item.titulo}</p><p className="text-xs text-muted-foreground">{item.canal} · {item.formato} · {item.status}</p></>} />}
-        {tab === "campanhas" && <DataList title="Campanhas" items={data?.campaigns ?? []} empty="Nenhuma campanha criada." render={(item) => <><p className="font-bold">{item.nome}</p><p className="text-xs text-muted-foreground">{item.objetivo} · {item.status}</p></>} />}
-        {tab === "followups" && <DataList title="Follow-ups" items={data?.followups ?? []} empty="Nenhum follow-up criado." render={(item) => <><p className="font-bold">{item.assunto}</p><p className="text-xs text-muted-foreground">Etapa {item.etapa} · {item.status}</p></>} />}
-      </main>
-    </div>
-  );
+  return <div className="min-h-screen bg-[#f5f7f6] text-graphite"><header className="sticky top-0 z-30 border-b border-border bg-white/95 backdrop-blur"><div className="mx-auto flex h-16 max-w-[1500px] items-center justify-between px-5 lg:px-8"><div className="flex items-center gap-3"><div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-white"><Bot className="h-5 w-5" /></div><div><p className="text-[10px] font-extrabold tracking-[0.18em] text-primary">CONFORMA360</p><p className="font-bold">Marketing AI</p></div></div><div className="flex items-center gap-2"><Button variant="outline" size="sm" onClick={() => void loadDashboard()} disabled={loading}><RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />Atualizar</Button><Button variant="ghost" size="sm" onClick={() => void logout()}><LogOut className="mr-2 h-4 w-4" />Sair</Button></div></div></header><main className="mx-auto max-w-[1500px] px-5 py-8 lg:px-8"><div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-extrabold tracking-[0.2em] text-primary">CENTRO DE COMANDO</p><h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">Marketing & Sales Intelligence</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Gestão, sugestões e alterações da operação em um único lugar.</p></div><div className="flex items-center gap-2 rounded-2xl border border-primary/15 bg-white px-4 py-3 text-xs font-semibold"><span className="h-2 w-2 rounded-full bg-primary" />Sales Engine conectado</div></div><nav className="mt-8 flex gap-1 overflow-x-auto rounded-2xl border border-border bg-white p-1.5 shadow-soft">{tabs.map(([id, label, Icon]) => <button key={id} onClick={() => { setTab(id); setEditing(null); setCreating(null); }} className={`flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition ${tab === id ? "bg-primary text-white" : "text-muted-foreground hover:bg-surface hover:text-graphite"}`}><Icon className="h-4 w-4" />{label}</button>)}</nav>{error && <div className="mt-5 flex items-center justify-between rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive"><span>{error}</span><button onClick={() => setError("")}><X className="h-4 w-4" /></button></div>}
+{tab === "visao-geral" && <Overview stats={stats} hotLeads={hotLeads} suggestions={suggestions} onTab={setTab} />}
+{tab === "leads" && <DataSection title="Leads" items={data?.leads ?? []} empty="Nenhum lead encontrado." onEdit={(row) => setEditing({ table: "leads_site", row })} render={(row) => <><p className="font-bold">{text(row.nome)}</p><p className="mt-1 text-xs text-muted-foreground">{text(row.empresa)} · {text(row.cargo) || "Cargo não informado"} · {moneyLabel(row.linha_comercial)} · Score {text(row.score) || "0"}</p><p className="mt-1 text-xs font-semibold text-primary">{text(row.temperatura).toUpperCase()} · {text(row.etapa)} · {text(row.status)}</p></>} />}
+{tab === "conteudos" && <><div className="mb-5 flex justify-end"><Button onClick={() => setCreating("content")}><Plus className="mr-2 h-4 w-4" />Novo conteúdo</Button></div><DataSection title="Conteúdos" items={data?.contents ?? []} empty="Nenhum conteúdo criado." onEdit={(row) => setEditing({ table: "marketing_contents", row })} render={(row) => <><p className="font-bold">{text(row.titulo)}</p><p className="mt-1 text-xs text-muted-foreground">{text(row.canal)} · {text(row.formato)} · {moneyLabel(row.linha_comercial)}</p><p className="mt-1 text-xs font-semibold text-primary">{text(row.status)} · {text(row.data_publicacao) || "sem data"}</p></>} /></>}
+{tab === "campanhas" && <><div className="mb-5 flex justify-end"><Button onClick={() => setCreating("campaign")}><Plus className="mr-2 h-4 w-4" />Nova campanha</Button></div><DataSection title="Campanhas" items={data?.campaigns ?? []} empty="Nenhuma campanha criada." onEdit={(row) => setEditing({ table: "marketing_campaigns", row })} render={(row) => <><p className="font-bold">{text(row.nome)}</p><p className="mt-1 text-xs text-muted-foreground">{text(row.objetivo)} · {moneyLabel(row.linha_comercial)} · {text(row.segmento)}</p><p className="mt-1 text-xs font-semibold text-primary">{text(row.status)} · {text(row.periodo_inicio)} → {text(row.periodo_fim)}</p></>} /></>}
+{tab === "followups" && <DataSection title="Follow-ups" items={data?.followups ?? []} empty="Nenhum follow-up criado." onEdit={(row) => setEditing({ table: "sales_followups", row })} render={(row) => <><p className="font-bold">{text(row.assunto)}</p><p className="mt-1 text-xs text-muted-foreground">Etapa {text(row.etapa)} · {text(row.canal)} · {text(row.agendado_para) || "sem agendamento"}</p><p className="mt-1 text-xs font-semibold text-primary">Status: {text(row.status)}</p><p className="mt-2 text-sm leading-6">{text(row.mensagem)}</p></>} />}
+{editing && <Editor table={editing.table} row={editing.row} saving={loading} onCancel={() => setEditing(null)} onSave={(values) => void mutate("PATCH", editing.table, text(editing.row.id), values)} />}{creating === "campaign" && <CreateForm title="Nova campanha" table="marketing_campaigns" fields={[["nome", "Nome"], ["objetivo", "Objetivo"], ["linha_comercial", "Linha comercial"], ["segmento", "Segmento"], ["periodo_inicio", "Início"], ["periodo_fim", "Fim"], ["status", "Status"]]} initial={{ objetivo: "Geração de demanda", linha_comercial: "ambos", status: "rascunho" }} saving={loading} onCancel={() => setCreating(null)} onCreate={(values) => void mutate("POST", "marketing_campaigns", undefined, values)} />}{creating === "content" && <CreateForm title="Novo conteúdo" table="marketing_contents" fields={[["titulo", "Título"], ["canal", "Canal"], ["formato", "Formato"], ["linha_comercial", "Linha comercial"], ["cta", "CTA"], ["data_publicacao", "Data de publicação"], ["status", "Status"]]} initial={{ canal: "instagram", formato: "carrossel", linha_comercial: "ambos", cta: "Fale com a Conforma360", status: "rascunho" }} saving={loading} onCancel={() => setCreating(null)} onCreate={(values) => void mutate("POST", "marketing_contents", undefined, values)} />}</main></div>;
 }
 
-function DataList({ title, items, empty, render }: { title: string; items: Array<Record<string, any>>; empty: string; render: (item: Record<string, any>) => React.ReactNode }) {
-  return <section className="mt-6 rounded-3xl border border-border bg-white p-6 shadow-soft"><p className="text-xs font-extrabold tracking-[0.16em] text-primary">CENTRO DE COMANDO</p><h2 className="mt-1 text-2xl font-extrabold">{title}</h2><div className="mt-6 divide-y divide-border">{items.map((item) => <div key={item.id} className="py-4">{render(item)}</div>)}{items.length === 0 && <div className="py-12 text-center text-sm text-muted-foreground">{empty}</div>}</div></section>;
-}
+function Overview({ stats, hotLeads, suggestions, onTab }: { stats?: DashboardData["stats"]; hotLeads: Row[]; suggestions: string[]; onTab: (tab: Tab) => void }) { const cards: Array<[string, string, typeof Users, string]> = [["Leads ativos", text(stats?.open ?? 0), Users, "base comercial"], ["Hot leads", text(stats?.hot ?? 0), Flame, "prioridade máxima"], ["Follow-ups", text(stats?.pendingFollowups ?? 0), MessageSquareText, "fila comercial"], ["Conversão", `${text(stats?.conversionRate ?? 0)}%`, Target, "leads convertidos"]]; return <><section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{cards.map(([label, value, Icon, note]) => <div key={label} className="rounded-2xl border border-border bg-white p-5 shadow-soft"><div className="flex items-center justify-between"><div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div><span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{note}</span></div><p className="mt-5 text-3xl font-extrabold">{value}</p><p className="mt-1 text-sm text-muted-foreground">{label}</p></div>)}</section><section className="mt-6 grid gap-5 lg:grid-cols-[1.15fr_.85fr]"><div className="rounded-3xl border border-border bg-white p-6 shadow-soft"><p className="text-xs font-extrabold tracking-[0.16em] text-primary">OPORTUNIDADES</p><h2 className="mt-1 text-xl font-extrabold">Leads que merecem atenção</h2><div className="mt-5 divide-y divide-border">{hotLeads.slice(0, 6).map((lead) => <button key={text(lead.id)} onClick={() => onTab("leads")} className="flex w-full items-center justify-between gap-4 py-4 text-left"><div className="min-w-0"><p className="truncate font-bold">{text(lead.nome)}</p><p className="mt-1 truncate text-xs text-muted-foreground">{text(lead.empresa)} · {text(lead.cargo) || "Cargo não informado"}</p></div><span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-extrabold text-primary">{text(lead.score) || "0"}/100</span></button>)}{hotLeads.length === 0 && <div className="py-10 text-center text-sm text-muted-foreground">Nenhum HOT no momento.</div>}</div></div><div className="rounded-3xl border border-border bg-white p-6 shadow-soft"><p className="text-xs font-extrabold tracking-[0.16em] text-primary">RECOMENDAÇÕES</p><h2 className="mt-1 text-xl font-extrabold">Próximas melhores ações</h2><div className="mt-5 space-y-3">{suggestions.map((idea, index) => <div key={idea} className="flex gap-3 rounded-2xl bg-surface p-4"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary text-xs font-extrabold text-white">{index + 1}</span><p className="text-sm leading-6">{idea}</p></div>)}</div><div className="mt-5 rounded-2xl border border-primary/15 bg-primary/5 p-4 text-xs leading-5 text-muted-foreground"><CheckCircle2 className="mb-2 h-4 w-4 text-primary" />A IA prepara. Você revisa e aprova. A publicação e a comunicação externa permanecem sob sua autorização.</div></div></section></>; }
+
+function DataSection({ title, items, empty, onEdit, render }: { title: string; items: Row[]; empty: string; onEdit: (row: Row) => void; render: (row: Row) => React.ReactNode }) { return <section className="mt-6 rounded-3xl border border-border bg-white p-6 shadow-soft"><div className="flex items-center justify-between"><div><p className="text-xs font-extrabold tracking-[0.16em] text-primary">GESTÃO</p><h2 className="mt-1 text-2xl font-extrabold">{title}</h2></div><span className="text-xs font-semibold text-muted-foreground">{items.length} registro(s)</span></div><div className="mt-6 divide-y divide-border">{items.map((item) => <div key={text(item.id)} className="flex items-start justify-between gap-4 py-4"><div className="min-w-0 flex-1">{render(item)}</div><Button variant="outline" size="sm" onClick={() => onEdit(item)}>Editar</Button></div>)}{items.length === 0 && <div className="py-12 text-center text-sm text-muted-foreground">{empty}</div>}</div></section>; }
+
+function Editor({ table, row, saving, onCancel, onSave }: { table: string; row: Row; saving: boolean; onCancel: () => void; onSave: (values: Row) => void }) { const fields = table === "leads_site" ? [["nome", "Nome"], ["empresa", "Empresa"], ["cargo", "Cargo"], ["linha_comercial", "Linha comercial"], ["interesse", "Interesse"], ["segmento", "Segmento"], ["score", "Score"], ["temperatura", "Temperatura"], ["etapa", "Etapa"], ["status", "Status"], ["proxima_acao", "Próxima ação"]] : table === "marketing_contents" ? [["titulo", "Título"], ["canal", "Canal"], ["formato", "Formato"], ["linha_comercial", "Linha comercial"], ["cta", "CTA"], ["data_publicacao", "Data de publicação"], ["status", "Status"]] : table === "marketing_campaigns" ? [["nome", "Nome"], ["objetivo", "Objetivo"], ["linha_comercial", "Linha comercial"], ["segmento", "Segmento"], ["periodo_inicio", "Início"], ["periodo_fim", "Fim"], ["status", "Status"]] : [["etapa", "Etapa"], ["canal", "Canal"], ["assunto", "Assunto"], ["mensagem", "Mensagem"], ["agendado_para", "Agendado para"], ["status", "Status"]]; const [values, setValues] = useState<Row>(() => Object.fromEntries(fields.map(([key]) => [key, row[key] ?? ""]))); return <Modal title="Editar registro" saving={saving} onCancel={onCancel} onSave={() => onSave(values)}><div className="grid gap-4 sm:grid-cols-2">{fields.map(([key, label]) => <label key={key} className={key === "mensagem" ? "sm:col-span-2" : ""}><span className="mb-1.5 block text-xs font-bold text-muted-foreground">{label}</span>{key === "mensagem" ? <Textarea rows={6} value={text(values[key])} onChange={(e) => setValues({ ...values, [key]: e.target.value })} /> : <Input value={text(values[key])} onChange={(e) => setValues({ ...values, [key]: e.target.value })} />}</label>)}</div></Modal>; }
+function CreateForm({ title, fields, initial, saving, onCancel, onCreate }: { title: string; table: string; fields: Array<[string, string]>; initial: Row; saving: boolean; onCancel: () => void; onCreate: (values: Row) => void }) { const [values, setValues] = useState<Row>(initial); return <Modal title={title} saving={saving} onCancel={onCancel} onSave={() => onCreate(values)}><div className="grid gap-4 sm:grid-cols-2">{fields.map(([key, label]) => <label key={key}><span className="mb-1.5 block text-xs font-bold text-muted-foreground">{label}</span><Input value={text(values[key])} onChange={(e) => setValues({ ...values, [key]: e.target.value })} /></label>)}</div></Modal>; }
+function Modal({ title, saving, onCancel, onSave, children }: { title: string; saving: boolean; onCancel: () => void; onSave: () => void; children: React.ReactNode }) { return <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 p-5"><div className="mx-auto mt-10 max-w-2xl rounded-3xl border border-border bg-white p-6 shadow-elevated"><div className="flex items-center justify-between"><div><p className="text-xs font-extrabold tracking-[0.16em] text-primary">ADMINISTRAÇÃO</p><h2 className="mt-1 text-2xl font-extrabold">{title}</h2></div><Button variant="ghost" onClick={onCancel}><X /></Button></div><div className="mt-6">{children}</div><div className="mt-6 flex justify-end gap-2"><Button variant="outline" onClick={onCancel}>Cancelar</Button><Button onClick={onSave} disabled={saving}><Save className="mr-2 h-4 w-4" />{saving ? "Salvando…" : "Salvar"}</Button></div></div></div>; }
