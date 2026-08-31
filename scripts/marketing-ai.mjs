@@ -3,11 +3,11 @@ import path from "node:path";
 
 const apiKey = process.env.ANTHROPIC_API_KEY;
 const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
-const supabaseUrl = process.env.SUPABASE_MARKETING_URL;
-const marketingKey = process.env.SUPABASE_MARKETING_KEY;
+const supabaseUrl = process.env.MARKETING_SUPABASE_URL;
+const marketingKey = process.env.MARKETING_SUPABASE_KEY;
 
 if (!apiKey || !supabaseUrl || !marketingKey) {
-  console.error("Secrets incompletos: ANTHROPIC_API_KEY, SUPABASE_MARKETING_URL e SUPABASE_MARKETING_KEY são obrigatórios.");
+  console.error("Secrets incompletos: ANTHROPIC_API_KEY, MARKETING_SUPABASE_URL e MARKETING_SUPABASE_KEY são obrigatórios.");
   process.exit(1);
 }
 
