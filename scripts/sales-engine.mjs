@@ -1,6 +1,6 @@
 const apiKey = process.env.ANTHROPIC_API_KEY;
-const supabaseUrl = process.env.SUPABASE_MARKETING_URL;
-const marketingKey = process.env.SUPABASE_MARKETING_KEY;
+const supabaseUrl = process.env.MARKETING_SUPABASE_URL;
+const marketingKey = process.env.MARKETING_SUPABASE_KEY;
 const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
 
 if (!apiKey || !supabaseUrl || !marketingKey) {
