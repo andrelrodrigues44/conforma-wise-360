@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import sharp from "sharp";
 
 const supabaseUrl = process.env.MARKETING_SUPABASE_URL;
 const marketingKey = process.env.MARKETING_SUPABASE_KEY;
@@ -39,15 +40,15 @@ async function withOfficialLogo(svg) {
   return cleanSvg.replace(/(<svg[^>]*>)/, `$1${logo}`);
 }
 
-async function uploadSvg(fileName, svg) {
+async function uploadObject(fileName, body, contentType) {
   const objectPath = `generated/${fileName}`;
   const response = await fetch(`${supabaseUrl}/storage/v1/object/${bucket}/${objectPath}`, {
     method: "POST",
-    headers: { ...headers, "Content-Type": "image/svg+xml", "x-upsert": "true" },
-    body: Buffer.from(svg, "utf8"),
+    headers: { ...headers, "Content-Type": contentType, "x-upsert": "true" },
+    body,
   });
-  const body = await response.text();
-  if (!response.ok) throw new Error(`Storage ${response.status}: ${body}`);
+  const responseBody = await response.text();
+  if (!response.ok) throw new Error(`Storage ${response.status}: ${responseBody}`);
   return `${supabaseUrl}/storage/v1/object/public/${bucket}/${objectPath}`;
 }
 
@@ -66,7 +67,14 @@ for (let index = 0; index < files.length; index++) {
   const original = await fs.readFile(path.join(generatedDir, file), "utf8");
   const svg = await withOfficialLogo(original);
   await fs.writeFile(path.join(generatedDir, file), svg, "utf8");
-  const creativeUrl = await uploadSvg(file, svg);
+
+  // O painel pode bloquear imagens aninhadas em SVG. Por isso, convertemos o criativo
+  // final para PNG: a logo fica fisicamente incorporada na imagem publicada/pré-visualizada.
+  const pngName = file.replace(/\.svg$/i, ".png");
+  const pngPath = path.join(generatedDir, pngName);
+  await sharp(Buffer.from(svg, "utf8")).png().toFile(pngPath);
+  const creativeUrl = await uploadObject(pngName, await fs.readFile(pngPath), "image/png");
+
   const content = contents[index];
   if (!content) continue;
   await supabase(`marketing_contents?id=eq.${content.id}`, {
@@ -74,7 +82,7 @@ for (let index = 0; index < files.length; index++) {
     headers: { Prefer: "return=minimal" },
     body: JSON.stringify({ criativo_url: creativeUrl, criativo_alt: `Criativo oficial Conforma360: ${content.titulo}` }),
   });
-  console.log(`Criativo vinculado: ${file} -> ${content.id}`);
+  console.log(`Criativo PNG vinculado: ${pngName} -> ${content.id}`);
 }
 
 console.log(`Sincronização concluída: ${files.length} criativos na campanha ${campaignId}.`);
