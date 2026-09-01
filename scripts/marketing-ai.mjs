@@ -150,14 +150,39 @@ async function supabase(pathname, options = {}) {
 
 function esc(value) { return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
 
+// librsvg (motor usado pelo sharp pra converter SVG->PNG em
+// sync-marketing-creatives.mjs) não renderiza <foreignObject> de forma
+// confiável -- o headline ficava em branco na imagem final mesmo com o
+// SVG correto (texto SVG nativo, como o resto do cartão, sempre
+// renderizou). Quebra de linha manual por contagem de caracteres +
+// <tspan> por linha é a forma que funciona garantido em qualquer
+// conversor, não só em navegador.
+function wrapText(text, maxCharsPerLine) {
+  const words = esc(text).split(/\s+/).filter(Boolean);
+  const lines = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length > maxCharsPerLine && current) { lines.push(current); current = word; }
+    else current = candidate;
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+function headlineTspans(text, { x, firstBaselineY, lineHeight, maxLines, maxCharsPerLine }) {
+  return wrapText(text, maxCharsPerLine).slice(0, maxLines).map((line, i) => `<tspan x="${x}" y="${firstBaselineY + i * lineHeight}">${line}</tspan>`).join("");
+}
+
 function creativeSvg(item, index) {
-  const headline = esc(item.headline).slice(0, 150);
+  const headlineText = headlineTspans(item.headline, { x: 80, firstBaselineY: 400, lineHeight: 70, maxLines: 7, maxCharsPerLine: 22 });
   const theme = esc(item.tema).slice(0, 120);
   const cta = esc(item.cta).slice(0, 90);
   const line = item.linha_comercial === "consultoria" ? "CONSULTORIA" : item.linha_comercial === "plataforma" ? "PLATAFORMA" : "CONSULTORIA + PLATAFORMA";
-  const channel = esc(item.canal).toUpperCase();
   const file = `${data}-criativo-${index + 1}.svg`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#f5f7f6"/><rect width="1080" height="18" fill="#0b7f43"/><circle cx="930" cy="150" r="180" fill="#e3f2ea"/><circle cx="930" cy="150" r="105" fill="#d2eadc"/><text x="80" y="105" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="7" fill="#0b7f43">CONFORMA360</text><text x="80" y="155" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4" fill="#6b7280">${esc(line)}</text><text x="80" y="270" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#0b7f43">${theme}</text><foreignObject x="80" y="330" width="900" height="500"><div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:64px;font-weight:800;line-height:1.08;color:#202124">${headline}</div></foreignObject><rect x="80" y="900" width="920" height="3" fill="#d7ded9"/><text x="80" y="975" font-family="Arial,sans-serif" font-size="23" fill="#6b7280">PRÉVIA PARA APROVAÇÃO • ${channel}</text><rect x="80" y="1050" rx="18" width="650" height="90" fill="#0b7f43"/><text x="115" y="1107" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="white">${cta}</text><text x="80" y="1260" font-family="Arial,sans-serif" font-size="20" fill="#7b8580">CONFORMA360 Marketing AI</text></svg>`;
+  // Nada de texto "prévia para aprovação"/rodapé de ferramenta interna
+  // aqui -- esta é a MESMA imagem que vira o post publicado depois de
+  // aprovada, então só pode conter o que faria sentido no post real.
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#f5f7f6"/><rect width="1080" height="18" fill="#0b7f43"/><circle cx="930" cy="150" r="180" fill="#e3f2ea"/><circle cx="930" cy="150" r="105" fill="#d2eadc"/><text x="80" y="105" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="7" fill="#0b7f43">CONFORMA360</text><text x="80" y="155" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4" fill="#6b7280">${esc(line)}</text><text x="80" y="270" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#0b7f43">${theme}</text><text font-family="Arial,sans-serif" font-size="64" font-weight="800" fill="#202124">${headlineText}</text><rect x="80" y="1050" rx="18" width="650" height="90" fill="#0b7f43"/><text x="115" y="1107" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="white">${cta}</text></svg>`;
   return { file, svg };
 }
 
@@ -169,17 +194,18 @@ function creativeSvg(item, index) {
 // do disco.
 function carouselSvgs(item, index) {
   const line = item.linha_comercial === "consultoria" ? "CONSULTORIA" : item.linha_comercial === "plataforma" ? "PLATAFORMA" : "CONSULTORIA + PLATAFORMA";
-  const channel = esc(item.canal).toUpperCase();
   const total = item.slides.length;
   return item.slides.map((slideText, slideIndex) => {
     const isLast = slideIndex === total - 1;
-    const headline = esc(slideText).slice(0, 160);
+    const headlineText = headlineTspans(slideText, { x: 80, firstBaselineY: 390, lineHeight: 66, maxLines: 8, maxCharsPerLine: 26 });
     const file = `${data}-criativo-${index + 1}-slide-${slideIndex + 1}.svg`;
     const progress = `${slideIndex + 1}/${total}`;
     const ctaBlock = isLast
       ? `<rect x="80" y="1050" rx="18" width="650" height="90" fill="#0b7f43"/><text x="115" y="1107" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="white">${esc(item.cta).slice(0, 90)}</text>`
       : `<text x="80" y="1107" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#0b7f43">Arraste para o próximo →</text>`;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#f5f7f6"/><rect width="1080" height="18" fill="#0b7f43"/><circle cx="930" cy="150" r="180" fill="#e3f2ea"/><circle cx="930" cy="150" r="105" fill="#d2eadc"/><text x="80" y="105" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="7" fill="#0b7f43">CONFORMA360</text><text x="80" y="155" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4" fill="#6b7280">${esc(line)}</text><rect x="895" y="55" rx="14" width="105" height="40" fill="#0b7f43"/><text x="947" y="82" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">${progress}</text><foreignObject x="80" y="330" width="900" height="620"><div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:58px;font-weight:800;line-height:1.12;color:#202124">${headline}</div></foreignObject><rect x="80" y="980" width="920" height="3" fill="#d7ded9"/><text x="80" y="1010" font-family="Arial,sans-serif" font-size="23" fill="#6b7280">PRÉVIA PARA APROVAÇÃO • ${channel}</text>${ctaBlock}<text x="80" y="1260" font-family="Arial,sans-serif" font-size="20" fill="#7b8580">CONFORMA360 Marketing AI</text></svg>`;
+    // Mesma regra do post único: nada de watermark/rodapé de ferramenta
+    // interna -- é a imagem que vira o slide publicado de verdade.
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#f5f7f6"/><rect width="1080" height="18" fill="#0b7f43"/><circle cx="930" cy="150" r="180" fill="#e3f2ea"/><circle cx="930" cy="150" r="105" fill="#d2eadc"/><text x="80" y="105" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="7" fill="#0b7f43">CONFORMA360</text><text x="80" y="155" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4" fill="#6b7280">${esc(line)}</text><rect x="895" y="55" rx="14" width="105" height="40" fill="#0b7f43"/><text x="947" y="82" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">${progress}</text><text font-family="Arial,sans-serif" font-size="58" font-weight="800" fill="#202124">${headlineText}</text>${ctaBlock}</svg>`;
     return { file, svg };
   });
 }
