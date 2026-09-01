@@ -22,11 +22,21 @@ async function supabase(pathname, options = {}) {
   return body ? JSON.parse(body) : null;
 }
 
-function withOfficialLogo(svg) {
-  if (svg.includes(logoUrl)) return svg;
-  const logo = `<image data-conforma360-logo="true" href="${logoUrl}" x="70" y="45" width="360" height="135" preserveAspectRatio="xMinYMid meet"/>`;
-  if (svg.includes('data-conforma360-logo="true"')) return svg;
-  return svg.replace(/<text x="80" y="105"[^>]*>CONFORMA360<\/text>/, logo).replace(/(<svg[^>]*>)/, `$1${logo}`);
+async function getLogoDataUri() {
+  const response = await fetch(logoUrl);
+  if (!response.ok) throw new Error(`Logo Conforma360 ${response.status}: não foi possível carregar a logo oficial.`);
+  const contentType = response.headers.get("content-type") || "image/jpeg";
+  const bytes = Buffer.from(await response.arrayBuffer());
+  return `data:${contentType};base64,${bytes.toString("base64")}`;
+}
+
+async function withOfficialLogo(svg) {
+  const logoDataUri = await getLogoDataUri();
+  const cleanSvg = svg
+    .replace(/<image[^>]*(?:data-conforma360-logo="true"|href="[^"]*Logo(?:%20| )Conforma360\.jpg")[^>]*\/>/gi, "")
+    .replace(/<image[^>]*href="https?:\/\/nezdrfoafuccuaaeozfc\.supabase\.co\/storage\/v1\/object\/public\/marketing-creatives\/Logo[^>]*\/>/gi, "");
+  const logo = `<image data-conforma360-logo="true" href="${logoDataUri}" x="70" y="45" width="360" height="135" preserveAspectRatio="xMinYMid meet"/>`;
+  return cleanSvg.replace(/(<svg[^>]*>)/, `$1${logo}`);
 }
 
 async function uploadSvg(fileName, svg) {
@@ -53,7 +63,7 @@ const contents = await supabase(`marketing_contents?select=id,titulo&campaign_id
 for (let index = 0; index < files.length; index++) {
   const file = files[index];
   const original = await fs.readFile(path.join(generatedDir, file), "utf8");
-  const svg = withOfficialLogo(original);
+  const svg = await withOfficialLogo(original);
   await fs.writeFile(path.join(generatedDir, file), svg, "utf8");
   const creativeUrl = await uploadSvg(file, svg);
   const content = contents[index];
