@@ -17,6 +17,22 @@ const outputDir = path.resolve("marketing/generated");
 const outputFile = path.join(outputDir, `${data}-campanha-semanal.md`);
 const repoRawBase = "https://raw.githubusercontent.com/andrelrodrigues44/conforma-wise-360/main/marketing/generated";
 
+// A campanha tem 1 conteúdo por dia útil (campaign.dias, seção "Distribua
+// os 5 dias úteis..." no prompt) -- offset 0 é o próprio dia da geração
+// (sempre segunda, pelo cron), os seguintes pulam fim de semana. Não
+// tenta interpretar o texto livre item.dia (ex. "Terça-feira") -- usa a
+// posição no array, que é ordem garantida.
+function addBusinessDaysIso(baseIso, offset) {
+  const date = new Date(`${baseIso}T00:00:00Z`);
+  let remaining = offset;
+  while (remaining > 0) {
+    date.setUTCDate(date.getUTCDate() + 1);
+    const weekday = date.getUTCDay();
+    if (weekday !== 0 && weekday !== 6) remaining--;
+  }
+  return date.toISOString().slice(0, 10);
+}
+
 const prompt = `Você é o agente de Growth Marketing da Conforma360.
 
 MISSÃO COMERCIAL
@@ -126,7 +142,7 @@ for (const [index, item] of campaign.dias.entries()) {
   const creative = creativeSvg(item, index);
   await fs.writeFile(path.join(outputDir, creative.file), creative.svg, "utf8");
   const creativeUrl = `${repoRawBase}/${creative.file}`;
-  await supabase("marketing_contents", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ campaign_id: campaignId, canal: item.canal, formato: "post", linha_comercial: item.linha_comercial, titulo: item.headline, legenda: item.legenda, cta: item.cta, criativo_brief: `${item.tema}. Dor/oportunidade: ${item.dor_oportunidade}. Criativo: ${item.criativo}. Métrica: ${item.metrica}.`, criativo_url: creativeUrl, criativo_alt: `Prévia Conforma360: ${item.headline}`, data_publicacao: null, status: "revisar" }) });
+  await supabase("marketing_contents", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ campaign_id: campaignId, canal: item.canal, formato: "post", linha_comercial: item.linha_comercial, titulo: item.headline, legenda: item.legenda, cta: item.cta, criativo_brief: `${item.tema}. Dor/oportunidade: ${item.dor_oportunidade}. Criativo: ${item.criativo}. Métrica: ${item.metrica}.`, criativo_url: creativeUrl, criativo_alt: `Prévia Conforma360: ${item.headline}`, data_publicacao: addBusinessDaysIso(data, index), status: "revisar" }) });
 }
 
 const lines = [`# Campanha semanal — ${data}`, "## Objetivo comercial", campaign.objetivo_comercial, "## Público prioritário", campaign.publico_prioritario, "## Oferta principal", campaign.oferta_principal, "## Estratégia de aquisição", campaign.estrategia_aquisicao, "## Calendário"];
