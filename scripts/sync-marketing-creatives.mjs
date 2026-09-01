@@ -3,10 +3,9 @@ import path from "node:path";
 
 const supabaseUrl = process.env.MARKETING_SUPABASE_URL;
 const marketingKey = process.env.MARKETING_SUPABASE_KEY;
-const logoUrl = process.env.CONFORMA360_LOGO_URL;
+const logoUrl = process.env.CONFORMA360_LOGO_URL || "https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/Logo%20Conforma360.jpg";
 
 if (!supabaseUrl || !marketingKey) throw new Error("MARKETING_SUPABASE_URL e MARKETING_SUPABASE_KEY são obrigatórios.");
-if (!logoUrl) throw new Error("CONFORMA360_LOGO_URL não configurada. Cadastre uma única vez a URL pública da logo oficial no Supabase Storage.");
 
 const data = new Date().toISOString().slice(0, 10);
 const generatedDir = path.resolve("marketing/generated");
@@ -24,8 +23,10 @@ async function supabase(pathname, options = {}) {
 }
 
 function withOfficialLogo(svg) {
-  const logo = `<image href="${logoUrl}" x="80" y="55" width="360" height="95" preserveAspectRatio="xMinYMid meet"/>`;
-  return svg.replace(/<text x="80" y="105"[^>]*>CONFORMA360<\/text>/, logo);
+  if (svg.includes(logoUrl)) return svg;
+  const logo = `<image data-conforma360-logo="true" href="${logoUrl}" x="70" y="45" width="360" height="135" preserveAspectRatio="xMinYMid meet"/>`;
+  if (svg.includes('data-conforma360-logo="true"')) return svg;
+  return svg.replace(/<text x="80" y="105"[^>]*>CONFORMA360<\/text>/, logo).replace(/(<svg[^>]*>)/, `$1${logo}`);
 }
 
 async function uploadSvg(fileName, svg) {
