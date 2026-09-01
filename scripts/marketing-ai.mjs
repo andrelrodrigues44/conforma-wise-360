@@ -48,6 +48,9 @@ Priorize mineração, indústria, empresas com múltiplas unidades, operações 
 ESTRATÉGIA
 Distribua os 5 dias úteis entre dor/risco, educação, autoridade/prova, produto/demonstração e conversão. Cada conteúdo precisa ter público, objetivo, canal, CTA e métrica. A semana deve conduzir o público para consultoria, diagnóstico, demonstração ou conversa comercial.
 
+FORMATO
+Pelo menos 1 dos 5 dias deve usar formato "carrossel" (varia o formato da semana; use "post" nos demais, salvo se o tema realmente pedir carrossel — ex. passo a passo, antes/depois, checklist, mitos vs fatos). Quando formato for "carrossel", preencha "slides" com 3 a 6 frases curtas (uma por slide, cada uma cabendo num cartão visual): a primeira é o gancho/capa, as intermediárias desenvolvem o raciocínio, a última reforça o CTA. Quando formato for "post", deixe "slides" como array vazio.
+
 TOM
 Português do Brasil. Técnico, objetivo, premium, claro e comercialmente responsável. Evite conteúdo genérico, frases vazias e promessas absolutas.
 
@@ -88,8 +91,10 @@ const schema = {
           cta: { type: "string" },
           criativo: { type: "string" },
           metrica: { type: "string" },
+          formato: { type: "string", enum: ["post", "carrossel"] },
+          slides: { type: "array", minItems: 0, maxItems: 6, items: { type: "string" } },
         },
-        required: ["dia", "canal", "linha_comercial", "tema", "dor_oportunidade", "objetivo", "headline", "legenda", "cta", "criativo", "metrica"],
+        required: ["dia", "canal", "linha_comercial", "tema", "dor_oportunidade", "objetivo", "headline", "legenda", "cta", "criativo", "metrica", "formato", "slides"],
       },
     },
     ativos_conversao: { type: "array", minItems: 2, maxItems: 2, items: { type: "string" } },
@@ -135,20 +140,51 @@ function creativeSvg(item, index) {
   return { file, svg };
 }
 
+// Um SVG por slide, mesmo cartão visual do post único (mesma logo/faixa
+// verde/moldura, adicionadas depois por sync-marketing-creatives.mjs).
+// Nome do arquivo carrega os dois índices (item da campanha + posição do
+// slide) -- é isso que sync-marketing-creatives.mjs usa pra agrupar os
+// arquivos de volta no mesmo conteúdo, sem depender de ordem de leitura
+// do disco.
+function carouselSvgs(item, index) {
+  const line = item.linha_comercial === "consultoria" ? "CONSULTORIA" : item.linha_comercial === "plataforma" ? "PLATAFORMA" : "CONSULTORIA + PLATAFORMA";
+  const channel = esc(item.canal).toUpperCase();
+  const total = item.slides.length;
+  return item.slides.map((slideText, slideIndex) => {
+    const isLast = slideIndex === total - 1;
+    const headline = esc(slideText).slice(0, 160);
+    const file = `${data}-criativo-${index + 1}-slide-${slideIndex + 1}.svg`;
+    const progress = `${slideIndex + 1}/${total}`;
+    const ctaBlock = isLast
+      ? `<rect x="80" y="1050" rx="18" width="650" height="90" fill="#0b7f43"/><text x="115" y="1107" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="white">${esc(item.cta).slice(0, 90)}</text>`
+      : `<text x="80" y="1107" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#0b7f43">Arraste para o próximo →</text>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#f5f7f6"/><rect width="1080" height="18" fill="#0b7f43"/><circle cx="930" cy="150" r="180" fill="#e3f2ea"/><circle cx="930" cy="150" r="105" fill="#d2eadc"/><text x="80" y="105" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="7" fill="#0b7f43">CONFORMA360</text><text x="80" y="155" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4" fill="#6b7280">${esc(line)}</text><rect x="895" y="55" rx="14" width="105" height="40" fill="#0b7f43"/><text x="947" y="82" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">${progress}</text><foreignObject x="80" y="330" width="900" height="620"><div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial,sans-serif;font-size:58px;font-weight:800;line-height:1.12;color:#202124">${headline}</div></foreignObject><rect x="80" y="980" width="920" height="3" fill="#d7ded9"/><text x="80" y="1010" font-family="Arial,sans-serif" font-size="23" fill="#6b7280">PRÉVIA PARA APROVAÇÃO • ${channel}</text>${ctaBlock}<text x="80" y="1260" font-family="Arial,sans-serif" font-size="20" fill="#7b8580">CONFORMA360 Marketing AI</text></svg>`;
+    return { file, svg };
+  });
+}
+
 const inserted = await supabase("marketing_campaigns?select=id", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify({ nome: `Campanha semanal — ${data}`, objetivo: campaign.objetivo_comercial, linha_comercial: "ambos", segmento: campaign.publico_prioritario, periodo_inicio: data, status: "rascunho" }) });
 const campaignId = inserted?.[0]?.id;
 if (!campaignId) throw new Error("Supabase não retornou o ID da campanha criada.");
 
 await fs.mkdir(outputDir, { recursive: true });
 for (const [index, item] of campaign.dias.entries()) {
-  const creative = creativeSvg(item, index);
-  await fs.writeFile(path.join(outputDir, creative.file), creative.svg, "utf8");
-  const creativeUrl = `${repoRawBase}/${creative.file}`;
-  await supabase("marketing_contents", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ campaign_id: campaignId, canal: item.canal, formato: "post", linha_comercial: item.linha_comercial, titulo: item.headline, legenda: item.legenda, cta: item.cta, criativo_brief: `${item.tema}. Dor/oportunidade: ${item.dor_oportunidade}. Criativo: ${item.criativo}. Métrica: ${item.metrica}.`, criativo_url: creativeUrl, criativo_alt: `Prévia Conforma360: ${item.headline}`, data_publicacao: addBusinessDaysIso(data, index), status: "revisar" }) });
+  const isCarrossel = item.formato === "carrossel" && Array.isArray(item.slides) && item.slides.length >= 2;
+  let creativeUrl;
+  if (isCarrossel) {
+    const slides = carouselSvgs(item, index);
+    for (const slide of slides) await fs.writeFile(path.join(outputDir, slide.file), slide.svg, "utf8");
+    creativeUrl = `${repoRawBase}/${slides[0].file}`;
+  } else {
+    const creative = creativeSvg(item, index);
+    await fs.writeFile(path.join(outputDir, creative.file), creative.svg, "utf8");
+    creativeUrl = `${repoRawBase}/${creative.file}`;
+  }
+  await supabase("marketing_contents", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ campaign_id: campaignId, canal: item.canal, formato: isCarrossel ? "carrossel" : "post", linha_comercial: item.linha_comercial, titulo: item.headline, legenda: item.legenda, cta: item.cta, criativo_brief: `${item.tema}. Dor/oportunidade: ${item.dor_oportunidade}. Criativo: ${item.criativo}. Métrica: ${item.metrica}.`, criativo_url: creativeUrl, criativo_alt: `Prévia Conforma360: ${item.headline}`, data_publicacao: addBusinessDaysIso(data, index), status: "revisar" }) });
 }
 
 const lines = [`# Campanha semanal — ${data}`, "## Objetivo comercial", campaign.objetivo_comercial, "## Público prioritário", campaign.publico_prioritario, "## Oferta principal", campaign.oferta_principal, "## Estratégia de aquisição", campaign.estrategia_aquisicao, "## Calendário"];
-campaign.dias.forEach((item, index) => { lines.push(`### Dia ${index + 1} — ${item.dia}`, `- Canal: ${item.canal}`, `- Linha comercial: ${item.linha_comercial}`, `- Tema: ${item.tema}`, `- Dor ou oportunidade: ${item.dor_oportunidade}`, `- Objetivo: ${item.objetivo}`, `- Headline: ${item.headline}`, `- Legenda completa: ${item.legenda}`, `- CTA: ${item.cta}`, `- Ideia de criativo: ${item.criativo}`, `- Métrica principal: ${item.metrica}`, `- Prévia visual: ${repoRawBase}/${data}-criativo-${index + 1}.svg`); });
+campaign.dias.forEach((item, index) => { const isCarrossel = item.formato === "carrossel" && Array.isArray(item.slides) && item.slides.length >= 2; const previaLine = isCarrossel ? `- Prévia visual (carrossel, ${item.slides.length} slides): ${item.slides.map((_, slideIndex) => `${repoRawBase}/${data}-criativo-${index + 1}-slide-${slideIndex + 1}.svg`).join(", ")}` : `- Prévia visual: ${repoRawBase}/${data}-criativo-${index + 1}.svg`; lines.push(`### Dia ${index + 1} — ${item.dia}`, `- Canal: ${item.canal}`, `- Formato: ${isCarrossel ? "carrossel" : "post"}`, `- Linha comercial: ${item.linha_comercial}`, `- Tema: ${item.tema}`, `- Dor ou oportunidade: ${item.dor_oportunidade}`, `- Objetivo: ${item.objetivo}`, `- Headline: ${item.headline}`, `- Legenda completa: ${item.legenda}`, `- CTA: ${item.cta}`, `- Ideia de criativo: ${item.criativo}`, `- Métrica principal: ${item.metrica}`, previaLine); });
 lines.push("## Ativos de conversão", ...campaign.ativos_conversao.map((x) => `- ${x}`), "## Sequência de follow-up", ...campaign.followups.map((x) => `- ${x}`), "## Hipóteses de teste", ...campaign.testes_ab.map((x) => `- ${x}`), "## Próximas ações comerciais", ...campaign.proximas_acoes.map((x) => `- ${x}`), "## Critérios de aprovação", ...campaign.criterios_aprovacao.map((x) => `- ${x}`), "", "---", "Gerado automaticamente pelo CONFORMA360 Marketing AI.");
 await fs.writeFile(outputFile, `${lines.join("\n")}\n`, "utf8");
 console.log(`Campanha gerada e persistida: ${outputFile} | campaign_id=${campaignId} | conteúdos=${campaign.dias.length}`);
