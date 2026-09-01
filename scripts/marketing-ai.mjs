@@ -62,6 +62,14 @@ REGRAS DE SEGURANÇA
 - Não publicar automaticamente em redes sociais nesta etapa; gerar conteúdo para revisão/aprovação.
 - Sempre distinguir Consultoria de Plataforma.
 
+CONTAGENS OBRIGATÓRIAS (o schema não trava isso — siga à risca)
+- "dias": exatamente 5 itens.
+- "ativos_conversao": exatamente 2 itens.
+- "followups": exatamente 3 itens.
+- "testes_ab": exatamente 3 itens.
+- "proximas_acoes": exatamente 5 itens.
+- "criterios_aprovacao": entre 4 e 8 itens.
+
 Gere a campanha da próxima semana. Retorne SOMENTE um objeto compatível com o schema solicitado.`;
 
 const schema = {
@@ -74,7 +82,6 @@ const schema = {
     estrategia_aquisicao: { type: "string" },
     dias: {
       type: "array",
-      minItems: 5,
       maxItems: 5,
       items: {
         type: "object",
@@ -97,11 +104,11 @@ const schema = {
         required: ["dia", "canal", "linha_comercial", "tema", "dor_oportunidade", "objetivo", "headline", "legenda", "cta", "criativo", "metrica", "formato", "slides"],
       },
     },
-    ativos_conversao: { type: "array", minItems: 2, maxItems: 2, items: { type: "string" } },
-    followups: { type: "array", minItems: 3, maxItems: 3, items: { type: "string" } },
-    testes_ab: { type: "array", minItems: 3, maxItems: 3, items: { type: "string" } },
-    proximas_acoes: { type: "array", minItems: 5, maxItems: 5, items: { type: "string" } },
-    criterios_aprovacao: { type: "array", minItems: 4, maxItems: 8, items: { type: "string" } },
+    ativos_conversao: { type: "array", maxItems: 2, items: { type: "string" } },
+    followups: { type: "array", maxItems: 3, items: { type: "string" } },
+    testes_ab: { type: "array", maxItems: 3, items: { type: "string" } },
+    proximas_acoes: { type: "array", maxItems: 5, items: { type: "string" } },
+    criterios_aprovacao: { type: "array", maxItems: 8, items: { type: "string" } },
   },
   required: ["objetivo_comercial", "publico_prioritario", "oferta_principal", "estrategia_aquisicao", "dias", "ativos_conversao", "followups", "testes_ab", "proximas_acoes", "criterios_aprovacao"],
 };
@@ -119,6 +126,21 @@ if (!block?.text) throw new Error(`Anthropic não retornou conteúdo textual. st
 
 let campaign;
 try { campaign = JSON.parse(block.text); } catch (error) { throw new Error(`JSON da campanha inválido: ${error.message}`); }
+
+// O schema não trava mais "minItems" diferente de 0/1 (a API da Anthropic
+// passou a rejeitar isso em output_config.format.schema) -- a contagem
+// exata agora só é pedida no prompt, então validamos aqui e falhamos
+// alto/claro em vez de publicar uma campanha incompleta.
+function validarContagem(nome, valor, min, max = min) {
+  const tamanho = Array.isArray(valor) ? valor.length : -1;
+  if (tamanho < min || tamanho > max) throw new Error(`Campanha inválida: "${nome}" deveria ter ${min === max ? `${min} itens` : `entre ${min} e ${max} itens`}, veio ${tamanho < 0 ? "campo ausente/inválido" : tamanho}.`);
+}
+validarContagem("dias", campaign.dias, 5);
+validarContagem("ativos_conversao", campaign.ativos_conversao, 2);
+validarContagem("followups", campaign.followups, 3);
+validarContagem("testes_ab", campaign.testes_ab, 3);
+validarContagem("proximas_acoes", campaign.proximas_acoes, 5);
+validarContagem("criterios_aprovacao", campaign.criterios_aprovacao, 4, 8);
 
 async function supabase(pathname, options = {}) {
   const res = await fetch(`${supabaseUrl}/rest/v1/${pathname}`, { ...options, headers: { apikey: marketingKey, Authorization: `Bearer ${marketingKey}`, "Content-Type": "application/json", ...(options.headers || {}) } });
