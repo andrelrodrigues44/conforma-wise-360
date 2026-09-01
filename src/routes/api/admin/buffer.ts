@@ -29,7 +29,11 @@ async function authorized(request: Request) {
 }
 
 async function bufferRequest(query: string, variables?: Record<string, unknown>) {
-  const token = process.env["BUFFER_API_KEY"];
+  // .trim() -- secret colado com espaço/quebra de linha invisível no
+  // fim quebra o header Authorization sem dar nenhum aviso claro (já
+  // vimos exatamente essa classe de bug antes, com outra chave, nesta
+  // mesma sessão).
+  const token = process.env["BUFFER_API_KEY"]?.trim();
   if (!token) throw new Error("Buffer não configurado. Adicione o secret BUFFER_API_KEY.");
   const response = await fetch("https://api.buffer.com", {
     method: "POST",
