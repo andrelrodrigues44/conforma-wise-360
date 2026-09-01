@@ -7,7 +7,7 @@ const logoUrl = process.env.CONFORMA360_LOGO_URL || "https://nezdrfoafuccuaaeozf
 
 if (!supabaseUrl || !marketingKey) throw new Error("MARKETING_SUPABASE_URL e MARKETING_SUPABASE_KEY são obrigatórios.");
 
-const data = new Date().toISOString().slice(0, 10);
+const data = process.env.MARKETING_CREATIVE_DATE || new Date().toISOString().slice(0, 10);
 const generatedDir = path.resolve("marketing/generated");
 const bucket = "marketing-creatives";
 const headers = { apikey: marketingKey, Authorization: `Bearer ${marketingKey}` };
@@ -51,7 +51,8 @@ async function uploadSvg(fileName, svg) {
   return `${supabaseUrl}/storage/v1/object/public/${bucket}/${objectPath}`;
 }
 
-const files = (await fs.readdir(generatedDir)).filter((file) => file.startsWith(`${data}-criativo-`) && file.endsWith(".svg")).sort();
+const allFiles = (await fs.readdir(generatedDir)).filter((file) => /^\d{4}-\d{2}-\d{2}-criativo-.*\.svg$/.test(file)).sort();
+const files = allFiles.filter((file) => file.startsWith(`${data}-criativo-`));
 if (!files.length) throw new Error(`Nenhum criativo encontrado para ${data}.`);
 
 const campaigns = await supabase(`marketing_campaigns?select=id&order=created_at.desc&limit=1`);
