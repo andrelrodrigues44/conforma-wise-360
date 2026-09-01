@@ -28,7 +28,7 @@ async function authorized(request: Request) {
 function tableConfig(table: string) {
   const configs: Record<string, string[]> = {
     leads_site: ["nome", "empresa", "cargo", "linha_comercial", "interesse", "segmento", "porte", "unidades", "score", "temperatura", "etapa", "status", "proxima_acao", "proxima_acao_em"],
-    marketing_contents: ["campaign_id", "canal", "formato", "linha_comercial", "titulo", "legenda", "cta", "criativo_brief", "data_publicacao", "status"],
+    marketing_contents: ["campaign_id", "canal", "formato", "linha_comercial", "titulo", "legenda", "cta", "criativo_brief", "criativo_url", "criativo_alt", "data_publicacao", "status"],
     marketing_campaigns: ["nome", "objetivo", "linha_comercial", "segmento", "periodo_inicio", "periodo_fim", "status"],
     sales_followups: ["lead_id", "etapa", "canal", "assunto", "mensagem", "agendado_para", "status"],
   };

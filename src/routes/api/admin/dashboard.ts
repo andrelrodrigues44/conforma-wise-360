@@ -40,7 +40,7 @@ async function getTable(table: string, query: string) {
 async function getContents(url: string, key: string) {
   const base = `${url}/rest/v1/marketing_contents`;
   const requestHeaders = headers(key);
-  const full = `${base}?select=id,campaign_id,canal,formato,linha_comercial,titulo,legenda,cta,criativo_brief,criativo_url,criativo_alt,data_publicacao,status,created_at&order=created_at.desc&limit=100`;
+  const full = `${base}?select=id,campaign_id,canal,formato,linha_comercial,titulo,legenda,cta,criativo_brief,criativo_url,criativo_urls,criativo_alt,data_publicacao,status,created_at&order=created_at.desc&limit=100`;
   const response = await fetch(full, { headers: requestHeaders });
   if (response.ok) return response.json();
   if (response.status !== 400) throw new Error(`Supabase marketing_contents: ${response.status}`);
