@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// Comentário deliberado: força um deploy novo pra garantir que o secret
-// BUFFER_API_KEY atualizado seja de fato aplicado no Worker publicado
-// (troca de secret sozinha não parecia disparar publicação nova).
+// Comentário deliberado (2ª tentativa): força mais um deploy novo --
+// mesmo depois de recolar BUFFER_API_KEY correto (validado direto contra
+// a API do Buffer via PowerShell, funcionando), o app publicado ainda
+// não refletia o valor novo sem um deploy de código real.
 const COOKIE_NAME = "conforma360_marketing_session";
 
 function getSession(request: Request) {
