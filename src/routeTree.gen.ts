@@ -16,6 +16,7 @@ import { Route as MarketingDashboardRouteImport } from './routes/marketing-dashb
 import { Route as PrecosRouteImport } from './routes/precos'
 import { Route as SalesEngineRouteImport } from './routes/sales-engine'
 import { Route as BlogSlugRouteImport } from './routes/blog_.$slug'
+import { Route as ApiAdminBufferRouteImport } from './routes/api/admin/buffer'
 import { Route as ApiAdminDashboardRouteImport } from './routes/api/admin/dashboard'
 import { Route as ApiAdminLoginRouteImport } from './routes/api/admin/login'
 import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
@@ -57,6 +58,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminBufferRoute = ApiAdminBufferRouteImport.update({
+  id: '/api/admin/buffer',
+  path: '/api/admin/buffer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminDashboardRoute = ApiAdminDashboardRouteImport.update({
   id: '/api/admin/dashboard',
   path: '/api/admin/dashboard',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/precos': typeof PrecosRoute
   '/sales-engine': typeof SalesEngineRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/api/admin/buffer': typeof ApiAdminBufferRoute
   '/api/admin/dashboard': typeof ApiAdminDashboardRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/precos': typeof PrecosRoute
   '/sales-engine': typeof SalesEngineRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/api/admin/buffer': typeof ApiAdminBufferRoute
   '/api/admin/dashboard': typeof ApiAdminDashboardRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/precos': typeof PrecosRoute
   '/sales-engine': typeof SalesEngineRoute
   '/blog_/$slug': typeof BlogSlugRoute
+  '/api/admin/buffer': typeof ApiAdminBufferRoute
   '/api/admin/dashboard': typeof ApiAdminDashboardRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/precos'
     | '/sales-engine'
     | '/blog/$slug'
+    | '/api/admin/buffer'
     | '/api/admin/dashboard'
     | '/api/admin/login'
     | '/api/admin/logout'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/precos'
     | '/sales-engine'
     | '/blog/$slug'
+    | '/api/admin/buffer'
     | '/api/admin/dashboard'
     | '/api/admin/login'
     | '/api/admin/logout'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/precos'
     | '/sales-engine'
     | '/blog_/$slug'
+    | '/api/admin/buffer'
     | '/api/admin/dashboard'
     | '/api/admin/login'
     | '/api/admin/logout'
@@ -180,6 +192,7 @@ export interface RootRouteChildren {
   PrecosRoute: typeof PrecosRoute
   SalesEngineRoute: typeof SalesEngineRoute
   BlogSlugRoute: typeof BlogSlugRoute
+  ApiAdminBufferRoute: typeof ApiAdminBufferRoute
   ApiAdminDashboardRoute: typeof ApiAdminDashboardRoute
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
   ApiAdminLogoutRoute: typeof ApiAdminLogoutRoute
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/buffer': {
+      id: '/api/admin/buffer'
+      path: '/api/admin/buffer'
+      fullPath: '/api/admin/buffer'
+      preLoaderRoute: typeof ApiAdminBufferRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/dashboard': {
       id: '/api/admin/dashboard'
       path: '/api/admin/dashboard'
@@ -284,6 +304,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrecosRoute: PrecosRoute,
   SalesEngineRoute: SalesEngineRoute,
   BlogSlugRoute: BlogSlugRoute,
+  ApiAdminBufferRoute: ApiAdminBufferRoute,
   ApiAdminDashboardRoute: ApiAdminDashboardRoute,
   ApiAdminLoginRoute: ApiAdminLoginRoute,
   ApiAdminLogoutRoute: ApiAdminLogoutRoute,

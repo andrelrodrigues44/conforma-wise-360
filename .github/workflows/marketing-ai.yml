@@ -28,6 +28,9 @@ jobs:
           MARKETING_SUPABASE_KEY: ${{ secrets.MARKETING_SUPABASE_KEY }}
         run: node scripts/marketing-ai.mjs
 
+      - name: Instalar Sharp
+        run: npm install --no-save sharp
+
       - name: Upload and link creative previews
         env:
           MARKETING_SUPABASE_URL: ${{ secrets.MARKETING_SUPABASE_URL }}

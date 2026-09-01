@@ -6,7 +6,7 @@ function getSession(request: Request) {
   const cookie = request.headers.get("cookie") || "";
   const match = cookie.match(new RegExp(`${COOKIE_NAME}=([^;]+)`));
   if (!match) return null;
-  const [value, signature] = decodeURIComponent(match[1]).split(".");
+  const [value, signature] = decodeURIComponent(match[1] ?? "").split(".");
   return value && signature ? { value, signature } : null;
 }
 
@@ -33,7 +33,7 @@ async function bufferRequest(query: string, variables?: Record<string, unknown>)
     body: JSON.stringify({ query, variables }),
   });
   const body = await response.text();
-  let json: any = null;
+  let json: { data?: unknown; errors?: { message?: string }[]; raw?: string } | null = null;
   try { json = body ? JSON.parse(body) : null; } catch { json = { raw: body }; }
   if (!response.ok) throw new Error(json?.errors?.[0]?.message || `Buffer API ${response.status}`);
   if (json?.errors?.length) throw new Error(json.errors[0]?.message || "Erro na Buffer API.");
@@ -67,7 +67,7 @@ export const Route = createFileRoute("/api/admin/buffer")({
             aiAssisted: true,
             assets,
           };
-          if (body.action === "schedule") input.dueAt = body.dueAt;
+          if (body.action === "schedule") input["dueAt"] = body.dueAt;
           const data = await bufferRequest(`mutation CreateMarketingPost($input: CreatePostInput!) { createPost(input: $input) { ... on PostActionSuccess { post { id text dueAt status channelId } } ... on MutationError { message } ... on InvalidInputError { message } ... on UnauthorizedError { message } ... on UnexpectedError { message } } }`, { input });
           return new Response(JSON.stringify(data), { status: 201, headers: { "Content-Type": "application/json" } });
         } catch (error) {
