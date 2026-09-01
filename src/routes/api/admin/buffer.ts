@@ -53,24 +53,6 @@ export const Route = createFileRoute("/api/admin/buffer")({
     handlers: {
       GET: async ({ request }) => {
         if (!(await authorized(request))) return new Response(JSON.stringify({ error: "Não autorizado." }), { status: 401 });
-        // Diagnóstico temporário -- nunca expõe a chave inteira, só
-        // tamanho e as pontas, pra confirmar se o valor chegando no
-        // servidor bate com o esperado. Remover depois de resolvido.
-        const url = new URL(request.url);
-        if (url.searchParams.get("debug") === "1") {
-          const raw = process.env["BUFFER_API_KEY"];
-          const trimmed = raw?.trim();
-          return new Response(
-            JSON.stringify({
-              present: Boolean(raw),
-              rawLength: raw?.length ?? null,
-              trimmedLength: trimmed?.length ?? null,
-              preview: trimmed ? `${trimmed.slice(0, 4)}…${trimmed.slice(-4)}` : null,
-              hadWhitespace: raw !== undefined && raw !== trimmed,
-            }),
-            { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } },
-          );
-        }
         try {
           const data = await bufferRequest(`query GetBufferAccount { account { organizations { id name channels { id name displayName service avatar isQueuePaused } } } }`);
           return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
