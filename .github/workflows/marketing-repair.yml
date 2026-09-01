@@ -1,0 +1,33 @@
+name: CONFORMA360 Marketing - Reparar Criativos
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair-creative:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Reparar e sincronizar criativos
+        env:
+          MARKETING_SUPABASE_URL: ${{ secrets.MARKETING_SUPABASE_URL }}
+          MARKETING_SUPABASE_KEY: ${{ secrets.MARKETING_SUPABASE_KEY }}
+          CONFORMA360_LOGO_URL: ${{ vars.CONFORMA360_LOGO_URL }}
+        run: node scripts/sync-marketing-creatives.mjs
+
+      - name: Commit criativos reparados
+        run: |
+          git config user.name "conforma360-marketing-repair[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add marketing/generated/
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração local para commitar."
+            exit 0
+          fi
+          git commit -m "fix(marketing): repara criativos com logo incorporada"
+          git push
