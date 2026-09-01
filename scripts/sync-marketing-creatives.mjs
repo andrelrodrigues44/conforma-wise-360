@@ -12,9 +12,6 @@ const data = process.env.MARKETING_CREATIVE_DATE || new Date().toISOString().sli
 const generatedDir = path.resolve("marketing/generated");
 const bucket = "marketing-creatives";
 const headers = { apikey: marketingKey, Authorization: `Bearer ${marketingKey}` };
-// Diagnóstico temporário: confirma qual projeto/bucket o script está de
-// fato mirando nesta execução (não expõe a chave, só a URL do projeto).
-console.log(`Sync alvo: ${supabaseUrl} bucket=${bucket} data=${data}`);
 
 async function supabase(pathname, options = {}) {
   const response = await fetch(`${supabaseUrl}/rest/v1/${pathname}`, {
@@ -51,11 +48,6 @@ async function uploadObject(fileName, body, contentType) {
   });
   const responseBody = await response.text();
   if (!response.ok) throw new Error(`Storage ${response.status}: ${responseBody}`);
-  // Diagnóstico temporário: o upload reportou 200 antes, mas o objeto não
-  // aparecia depois no bucket (URL pública dando 404, arquivo ausente no
-  // painel Storage) -- logar status + corpo cru da resposta pra confirmar
-  // se o Supabase realmente devolveu a Key esperada ou algo inesperado.
-  console.log(`Storage upload -> status=${response.status} path=${objectPath} body=${responseBody.slice(0, 300)}`);
   return `${supabaseUrl}/storage/v1/object/public/${bucket}/${objectPath}`;
 }
 
