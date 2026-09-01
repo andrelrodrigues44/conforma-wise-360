@@ -21,16 +21,18 @@ const repoRawBase = "https://raw.githubusercontent.com/andrelrodrigues44/conform
 // os 5 dias úteis..." no prompt) -- offset 0 é o próprio dia da geração
 // (sempre segunda, pelo cron), os seguintes pulam fim de semana. Não
 // tenta interpretar o texto livre item.dia (ex. "Terça-feira") -- usa a
-// posição no array, que é ordem garantida.
+// posição no array, que é ordem garantida. data_publicacao é
+// TIMESTAMPTZ (não DATE) -- retorna um timestamp completo, às 13h UTC
+// (10h BRT), não só a data, senão o horário salvo vira meia-noite UTC.
 function addBusinessDaysIso(baseIso, offset) {
-  const date = new Date(`${baseIso}T00:00:00Z`);
+  const date = new Date(`${baseIso}T13:00:00Z`);
   let remaining = offset;
   while (remaining > 0) {
     date.setUTCDate(date.getUTCDate() + 1);
     const weekday = date.getUTCDay();
     if (weekday !== 0 && weekday !== 6) remaining--;
   }
-  return date.toISOString().slice(0, 10);
+  return date.toISOString();
 }
 
 const prompt = `Você é o agente de Growth Marketing da Conforma360.

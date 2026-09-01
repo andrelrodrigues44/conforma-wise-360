@@ -55,9 +55,12 @@ export const Route = createFileRoute("/api/admin/buffer")({
       POST: async ({ request }) => {
         if (!(await authorized(request))) return new Response(JSON.stringify({ error: "Não autorizado." }), { status: 401 });
         try {
-          const body = await request.json() as { action?: "draft" | "schedule"; channelId?: string; text?: string; dueAt?: string; assetUrl?: string; service?: string };
+          const body = await request.json() as { action?: "draft" | "schedule"; channelId?: string; text?: string; dueAt?: string; assetUrl?: string; assetType?: "image" | "video"; service?: string };
           if (!body.channelId || !body.text) return new Response(JSON.stringify({ error: "channelId e text são obrigatórios." }), { status: 400 });
-          const assets = body.assetUrl ? [{ image: { url: body.assetUrl } }] : [];
+          // assetType permite anexar vídeo em vez de imagem -- necessário
+          // pra canais como TikTok, que não aceitam imagem estática.
+          const assetKind = body.assetType === "video" ? "video" : "image";
+          const assets = body.assetUrl ? [{ [assetKind]: { url: body.assetUrl } }] : [];
           const input: Record<string, unknown> = {
             channelId: body.channelId,
             text: body.text,

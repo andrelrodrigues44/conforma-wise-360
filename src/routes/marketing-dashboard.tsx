@@ -57,7 +57,7 @@ function MarketingDashboardPage() {
 {tab === "conteudos" && <><div className="mb-5 flex items-center justify-between gap-3"><div><p className="text-sm font-semibold text-muted-foreground">Fila de aprovação</p><p className="text-xs text-muted-foreground">A IA prepara a arte e o texto. Você decide o que pode avançar.</p></div><Button onClick={() => setCreating("content")}><Plus className="mr-2 h-4 w-4" />Novo conteúdo</Button></div><ContentSection items={data?.contents ?? []} onReview={setReviewing} onEdit={(row) => setEditing({ table: "marketing_contents", row })} onPublish={setPublishingRow} /></>}
 {tab === "campanhas" && <><div className="mb-5 flex justify-end"><Button onClick={() => setCreating("campaign")}><Plus className="mr-2 h-4 w-4" />Nova campanha</Button></div><DataSection title="Campanhas" items={data?.campaigns ?? []} empty="Nenhuma campanha criada." onEdit={(row) => setEditing({ table: "marketing_campaigns", row })} render={(row) => <><p className="font-bold">{text(row.nome)}</p><p className="mt-1 text-xs text-muted-foreground">{text(row.objetivo)} · {moneyLabel(row.linha_comercial)} · {text(row.segmento)}</p><p className="mt-1 text-xs font-semibold text-primary">{text(row.status)} · {text(row.periodo_inicio)} → {text(row.periodo_fim)}</p></>} /></>}
 {tab === "followups" && <DataSection title="Follow-ups" items={data?.followups ?? []} empty="Nenhum follow-up criado." onEdit={(row) => setEditing({ table: "sales_followups", row })} render={(row) => <><p className="font-bold">{text(row.assunto)}</p><p className="mt-1 text-xs text-muted-foreground">Etapa {text(row.etapa)} · {text(row.canal)} · {text(row.agendado_para) || "sem agendamento"}</p><p className="mt-1 text-xs font-semibold text-primary">Status: {text(row.status)}</p><p className="mt-2 text-sm leading-6">{text(row.mensagem)}</p></>} />}
-{editing && <Editor table={editing.table} row={editing.row} saving={loading} onCancel={() => setEditing(null)} onSave={(values) => void mutate("PATCH", editing.table, text(editing.row.id), values)} />}{reviewing && <ReviewModal row={reviewing} saving={loading} onCancel={() => setReviewing(null)} onApprove={() => void mutate("PATCH", "marketing_contents", text(reviewing.id), { status: "aprovado" })} onReject={() => void mutate("PATCH", "marketing_contents", text(reviewing.id), { status: "rascunho" })} />}{publishingRow && <PublishModal row={publishingRow} onCancel={() => setPublishingRow(null)} onPublished={() => { const dueAt = scheduledDueAt(publishingRow); const isFuture = new Date(dueAt).getTime() - Date.now() > 5 * 60 * 1000; void mutate("PATCH", "marketing_contents", text(publishingRow.id), { status: isFuture ? "agendado" : "publicado", ...(text(publishingRow.data_publicacao) ? {} : { data_publicacao: dueAt.slice(0, 10) }) }); }} />}{creating === "campaign" && <CreateForm title="Nova campanha" fields={[["nome", "Nome"], ["objetivo", "Objetivo"], ["linha_comercial", "Linha comercial"], ["segmento", "Segmento"], ["periodo_inicio", "Início"], ["periodo_fim", "Fim"], ["status", "Status"]]} initial={{ objetivo: "Geração de demanda", linha_comercial: "ambos", status: "rascunho" }} saving={loading} onCancel={() => setCreating(null)} onCreate={(values) => void mutate("POST", "marketing_campaigns", undefined, values)} />}{creating === "content" && <CreateForm title="Novo conteúdo" fields={[["titulo", "Título"], ["canal", "Canal"], ["formato", "Formato"], ["linha_comercial", "Linha comercial"], ["cta", "CTA"], ["data_publicacao", "Data de publicação"], ["status", "Status"]]} initial={{ canal: "instagram", formato: "carrossel", linha_comercial: "ambos", cta: "Fale com a Conforma360", status: "rascunho" }} saving={loading} onCancel={() => setCreating(null)} onCreate={(values) => void mutate("POST", "marketing_contents", undefined, values)} />}</main></div>;
+{editing && <Editor table={editing.table} row={editing.row} saving={loading} onCancel={() => setEditing(null)} onSave={(values) => void mutate("PATCH", editing.table, text(editing.row.id), values)} />}{reviewing && <ReviewModal row={reviewing} saving={loading} onCancel={() => setReviewing(null)} onApprove={() => void mutate("PATCH", "marketing_contents", text(reviewing.id), { status: "aprovado" })} onReject={() => void mutate("PATCH", "marketing_contents", text(reviewing.id), { status: "rascunho" })} />}{publishingRow && <PublishModal row={publishingRow} onCancel={() => setPublishingRow(null)} onPublished={() => { const dueAt = scheduledDueAt(publishingRow); const isFuture = new Date(dueAt).getTime() - Date.now() > 5 * 60 * 1000; void mutate("PATCH", "marketing_contents", text(publishingRow.id), { status: isFuture ? "agendado" : "publicado", ...(text(publishingRow.data_publicacao) ? {} : { data_publicacao: dueAt }) }); }} />}{creating === "campaign" && <CreateForm title="Nova campanha" fields={[["nome", "Nome"], ["objetivo", "Objetivo"], ["linha_comercial", "Linha comercial"], ["segmento", "Segmento"], ["periodo_inicio", "Início"], ["periodo_fim", "Fim"], ["status", "Status"]]} initial={{ objetivo: "Geração de demanda", linha_comercial: "ambos", status: "rascunho" }} saving={loading} onCancel={() => setCreating(null)} onCreate={(values) => void mutate("POST", "marketing_campaigns", undefined, values)} />}{creating === "content" && <CreateForm title="Novo conteúdo" fields={[["titulo", "Título"], ["canal", "Canal"], ["formato", "Formato"], ["linha_comercial", "Linha comercial"], ["cta", "CTA"], ["data_publicacao", "Data de publicação"], ["status", "Status"]]} initial={{ canal: "instagram", formato: "carrossel", linha_comercial: "ambos", cta: "Fale com a Conforma360", status: "rascunho" }} saving={loading} onCancel={() => setCreating(null)} onCreate={(values) => void mutate("POST", "marketing_contents", undefined, values)} />}</main></div>;
 }
 
 function Overview({ stats, hotLeads, reviewContents, suggestions, onTab, onReview }: { stats?: DashboardData["stats"]; hotLeads: Row[]; reviewContents: Row[]; suggestions: string[]; onTab: (tab: Tab) => void; onReview: (row: Row) => void }) { const cards: Array<[string, string, typeof Users, string]> = [["Leads ativos", text(stats?.open ?? 0), Users, "base comercial"], ["Hot leads", text(stats?.hot ?? 0), Flame, "prioridade máxima"], ["Conteúdos para aprovar", text(stats?.reviewContents ?? 0), FileText, "fila de revisão"], ["Conversão", `${text(stats?.conversionRate ?? 0)}%`, Target, "leads convertidos"]]; return <><section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{cards.map(([label, value, Icon, note]) => <div key={label} className="rounded-2xl border border-border bg-white p-5 shadow-soft"><div className="flex items-center justify-between"><div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div><span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{note}</span></div><p className="mt-5 text-3xl font-extrabold">{value}</p><p className="mt-1 text-sm text-muted-foreground">{label}</p></div>)}</section><section className="mt-6 grid gap-5 lg:grid-cols-[1.15fr_.85fr]"><div className="rounded-3xl border border-border bg-white p-6 shadow-soft"><div className="flex items-center justify-between"><div><p className="text-xs font-extrabold tracking-[0.16em] text-primary">REVISÃO</p><h2 className="mt-1 text-xl font-extrabold">Conteúdos aguardando aprovação</h2></div>{reviewContents.length > 0 && <Button size="sm" onClick={() => onTab("conteudos")}>Ver fila</Button>}</div><div className="mt-5 divide-y divide-border">{reviewContents.slice(0, 5).map((content) => <div key={text(content.id)} className="flex items-center justify-between gap-4 py-4"><div className="min-w-0"><p className="truncate font-bold">{text(content.titulo)}</p><p className="mt-1 truncate text-xs text-muted-foreground">{text(content.canal)} · {moneyLabel(content.linha_comercial)}</p></div><Button variant="outline" size="sm" onClick={() => onReview(content)}><Eye className="mr-2 h-4 w-4" />Revisar</Button></div>)}{reviewContents.length === 0 && <div className="py-10 text-center text-sm text-muted-foreground">Nenhum conteúdo pendente.</div>}</div></div><div className="rounded-3xl border border-border bg-white p-6 shadow-soft"><p className="text-xs font-extrabold tracking-[0.16em] text-primary">RECOMENDAÇÕES</p><h2 className="mt-1 text-xl font-extrabold">Próximas melhores ações</h2><div className="mt-5 space-y-3">{suggestions.map((idea, index) => <div key={idea} className="flex gap-3 rounded-2xl bg-surface p-4"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary text-xs font-extrabold text-white">{index + 1}</span><p className="text-sm leading-6">{idea}</p></div>)}</div><div className="mt-5 rounded-2xl border border-primary/15 bg-primary/5 p-4 text-xs leading-5 text-muted-foreground"><CheckCircle2 className="mb-2 h-4 w-4 text-primary" />A IA prepara. Você revisa e aprova. Nada é publicado externamente sem autorização.</div></div></section></>; }
@@ -81,21 +81,28 @@ function Modal({ title, saving, onCancel, onSave, children }: { title: string; s
 type BufferChannel = { id: string; name?: string; displayName?: string; service?: string };
 // A campanha semanal já distribui 1 conteúdo por dia útil
 // (marketing-ai.mjs grava data_publicacao real, não mais null) -- usa
-// essa data (às 10h BRT / 13h UTC, mesmo horário do cron semanal) em
-// vez de publicar tudo no exato momento do clique. Se a data já passou
-// (ex.: aprovação atrasada) ou não existe, cai pra "agora" -- agendar
-// no passado não faz sentido.
+// esse horário em vez de publicar tudo no exato momento do clique. A
+// coluna é TIMESTAMPTZ (data + hora), não só data -- por isso parseia
+// direto, sem concatenar hora nenhuma (fizemos esse engano antes: um
+// valor já completo virava data inválida ao colar "T13:00..." de novo
+// no final). Se o valor já passou (ex.: aprovação atrasada) ou não
+// existe, cai pra "agora" -- agendar no passado não faz sentido.
 function scheduledDueAt(row: Row): string {
-  const rawDate = text(row.data_publicacao);
-  if (rawDate) {
-    const target = new Date(`${rawDate}T13:00:00.000Z`);
-    if (target.getTime() > Date.now()) return target.toISOString();
+  const rawValue = text(row.data_publicacao);
+  if (rawValue) {
+    const target = new Date(rawValue);
+    if (!Number.isNaN(target.getTime()) && target.getTime() > Date.now()) return target.toISOString();
   }
   return new Date().toISOString();
 }
+function isTikTokChannel(channel: BufferChannel): boolean {
+  return (channel.service ?? "").toLowerCase().includes("tiktok");
+}
+
 function PublishModal({ row, onCancel, onPublished }: { row: Row; onCancel: () => void; onPublished: () => void }) {
   const [channels, setChannels] = useState<BufferChannel[] | null>(null);
-  const [channelId, setChannelId] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [videoUrl, setVideoUrl] = useState("");
   const [loadingChannels, setLoadingChannels] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState("");
@@ -111,42 +118,63 @@ function PublishModal({ row, onCancel, onPublished }: { row: Row; onCancel: () =
         const organizations = (json?.account?.organizations ?? []) as OrgWithChannels[];
         const allChannels = organizations.flatMap((organization) => organization.channels ?? []);
         setChannels(allChannels);
-        const canal = text(row.canal).toLowerCase();
-        const match = allChannels.find((channel) => (channel.service ?? "").toLowerCase().includes(canal));
-        if (match) setChannelId(match.id);
+        // Pré-marca todos os canais conectados -- publicar em todos ao
+        // mesmo tempo é o caso comum; desmarcar é mais rápido que marcar
+        // um por um quando são só 2-3 canais.
+        setSelected(new Set(allChannels.map((channel) => channel.id)));
       })
       .catch((e) => { if (active) setError(e instanceof Error ? e.message : "Não foi possível carregar os canais do Buffer."); })
       .finally(() => { if (active) setLoadingChannels(false); });
     return () => { active = false; };
-  }, [row.canal]);
+  }, []);
 
-  async function publish() {
-    if (!channelId) { setError("Escolha um canal antes de publicar."); return; }
-    setPublishing(true);
-    setError("");
-    try {
-      const postText = [text(row.legenda), text(row.cta)].filter(Boolean).join("\n\n");
-      const response = await fetch("/api/admin/buffer", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "schedule",
-          channelId,
-          text: postText,
-          dueAt: scheduledDueAt(row),
-          assetUrl: text(row.criativo_url) || undefined,
-        }),
-      });
-      const json = await response.json().catch(() => ({}));
-      if (!response.ok || json?.error) throw new Error(json?.error || "Não foi possível publicar no Buffer.");
-      onPublished();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao publicar.");
-    } finally {
-      setPublishing(false);
-    }
+  function toggle(id: string) {
+    setSelected((previous) => {
+      const next = new Set(previous);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
   }
 
-  return <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 p-5"><div className="mx-auto mt-10 max-w-lg rounded-3xl border border-border bg-white p-6 shadow-elevated"><div className="flex items-center justify-between"><div><p className="text-xs font-extrabold tracking-[0.16em] text-primary">PUBLICAR</p><h2 className="mt-1 text-xl font-extrabold">{text(row.titulo)}</h2></div><Button variant="ghost" onClick={onCancel}><X /></Button></div><div className="mt-6 space-y-4">{loadingChannels ? <p className="text-sm text-muted-foreground">Carregando canais do Buffer…</p> : <label><span className="mb-1.5 block text-xs font-bold text-muted-foreground">Canal</span><select className="w-full rounded-xl border border-border p-2 text-sm" value={channelId} onChange={(e) => setChannelId(e.target.value)}><option value="">Selecione um canal…</option>{(channels ?? []).map((channel) => <option key={channel.id} value={channel.id}>{channel.displayName || channel.name} ({channel.service})</option>)}</select>{(channels ?? []).length === 0 && !loadingChannels && <p className="mt-2 text-xs text-muted-foreground">Nenhum canal conectado no Buffer ainda.</p>}</label>}{error && <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}</div><div className="mt-7 flex justify-end gap-2"><Button variant="outline" onClick={onCancel}>Cancelar</Button><Button onClick={() => void publish()} disabled={publishing || !channelId}><Send className="mr-2 h-4 w-4" />{publishing ? "Publicando…" : "Publicar agora"}</Button></div></div></div>;
+  const selectedChannels = (channels ?? []).filter((channel) => selected.has(channel.id));
+  const hasTikTokSelected = selectedChannels.some(isTikTokChannel);
+
+  async function publish() {
+    if (selectedChannels.length === 0) { setError("Escolha ao menos um canal antes de publicar."); return; }
+    if (hasTikTokSelected && !videoUrl.trim()) { setError("Informe a URL do vídeo pro TikTok antes de publicar."); return; }
+    setPublishing(true);
+    setError("");
+    const postText = [text(row.legenda), text(row.cta)].filter(Boolean).join("\n\n");
+    const dueAt = scheduledDueAt(row);
+    const failed: string[] = [];
+    // Buffer não tem "publicar em vários canais numa chamada só" -- um
+    // post por canal, sequencial (evita estourar limite de taxa da API).
+    for (const channel of selectedChannels) {
+      const isVideo = isTikTokChannel(channel);
+      try {
+        const response = await fetch("/api/admin/buffer", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "schedule",
+            channelId: channel.id,
+            text: postText,
+            dueAt,
+            assetUrl: isVideo ? videoUrl.trim() : text(row.criativo_url) || undefined,
+            assetType: isVideo ? "video" : "image",
+          }),
+        });
+        const json = await response.json().catch(() => ({}));
+        if (!response.ok || json?.error) throw new Error(json?.error || "Falha ao publicar.");
+      } catch {
+        failed.push(channel.displayName || channel.name || channel.id);
+      }
+    }
+    setPublishing(false);
+    if (failed.length > 0) { setError(`Falhou em: ${failed.join(", ")}. Os demais canais foram publicados normalmente.`); return; }
+    onPublished();
+  }
+
+  return <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 p-5"><div className="mx-auto mt-10 max-w-lg rounded-3xl border border-border bg-white p-6 shadow-elevated"><div className="flex items-center justify-between"><div><p className="text-xs font-extrabold tracking-[0.16em] text-primary">PUBLICAR</p><h2 className="mt-1 text-xl font-extrabold">{text(row.titulo)}</h2></div><Button variant="ghost" onClick={onCancel}><X /></Button></div><div className="mt-6 space-y-4">{loadingChannels ? <p className="text-sm text-muted-foreground">Carregando canais do Buffer…</p> : <div><span className="mb-2 block text-xs font-bold text-muted-foreground">Canais (marque todos que devem publicar agora)</span><div className="space-y-2">{(channels ?? []).map((channel) => <label key={channel.id} className="flex items-center gap-2 rounded-xl border border-border p-2.5 text-sm"><input type="checkbox" checked={selected.has(channel.id)} onChange={() => toggle(channel.id)} />{channel.displayName || channel.name} ({channel.service}){isTikTokChannel(channel) && <span className="ml-auto text-[10px] font-bold uppercase tracking-wide text-primary">vídeo</span>}</label>)}</div>{(channels ?? []).length === 0 && <p className="mt-2 text-xs text-muted-foreground">Nenhum canal conectado no Buffer ainda.</p>}</div>}{hasTikTokSelected && <label><span className="mb-1.5 block text-xs font-bold text-muted-foreground">URL do vídeo (TikTok exige vídeo, não aceita a imagem estática)</span><Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://…" /></label>}{error && <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}</div><div className="mt-7 flex justify-end gap-2"><Button variant="outline" onClick={onCancel}>Cancelar</Button><Button onClick={() => void publish()} disabled={publishing || selectedChannels.length === 0}><Send className="mr-2 h-4 w-4" />{publishing ? "Publicando…" : `Publicar agora (${selectedChannels.length})`}</Button></div></div></div>;
 }
