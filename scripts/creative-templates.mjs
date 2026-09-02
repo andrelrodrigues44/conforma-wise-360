@@ -62,7 +62,7 @@ const BRAND_STATS = ["Menos risco na operação", "Menos vulnerabilidade em conf
 const BASE_STYLE = `
   * { margin:0; padding:0; box-sizing:border-box; font-family: Arial, Helvetica, sans-serif; }
   body { width:1080px; background:#ffffff; }
-  .accent { color:#0e7fae; }
+  .accent { color:#0b7f43; }
 `;
 
 function featureItem([symbol, label]) {
@@ -112,37 +112,76 @@ export function renderPostHtml({ item, logoUrl, mockupUrl }) {
 }
 
 // ---------- Template 2: slide de carrossel (formato "carrossel") ----------
-// Canvas fixo 1080x1350 (mesma proporção retrato usada antes) -- cada
-// slide precisa preencher esse espaço sozinho, diferente do pôster
-// (altura livre). Fundo: foto gerada por IA (uma por conteúdo, já
-// compartilhada entre os slides) com painel translúcido atrás do texto
-// pra garantir contraste; sem foto (chave ausente/falha), cai pro fundo
-// liso.
+// Canvas fixo 1080x1350 -- cada slide é um "mini-pôster" completo (mesmo
+// nível de acabamento do post único: número, logo, headline com
+// destaque, foto de apoio, grade de módulos, callout, CTA, rodapé fixo),
+// não mais um cartão simples de headline sozinho. Reaproveita os mesmos
+// blocos de marca do pôster (BRAND_FEATURES/BRAND_OBJECTIVE/BRAND_STATS)
+// pra manter os dois formatos consistentes entre si.
+function carouselFeatureItem([symbol, label]) {
+  return `<div class="c-feature"><span class="c-feature-badge">${esc(symbol)}</span><span>${esc(label)}</span></div>`;
+}
+function carouselStatItem(label) {
+  return `<div class="c-stat">${esc(label)}</div>`;
+}
+
 export function renderCarouselSlideHtml({ item, slideText, slideIndex, total, isLast, logoUrl, backgroundDataUri }) {
-  const headline = esc(slideText);
-  const cta = esc(item.cta).slice(0, 60);
-  const bg = backgroundDataUri
-    ? `background-image:url('${backgroundDataUri}'); background-size:cover; background-position:center;`
-    : `background:#f5f7f6;`;
+  const headlineText = highlightedHeadline(slideText, item.headline_destaque);
+  const kicker = esc(item.tema).slice(0, 60).toUpperCase();
+  const cta = esc(item.cta).slice(0, 70);
+  const bgImage = backgroundDataUri ? `<img src="${backgroundDataUri}" alt=""/>` : "";
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${BASE_STYLE}
     body { width:1080px; height:1350px; }
-    .canvas { width:1080px; height:1350px; ${bg} position:relative; display:flex; flex-direction:column; }
-    .canvas::before { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(255,255,255,.75) 0%, rgba(255,255,255,.55) 45%, rgba(255,255,255,.85) 100%); }
-    .bar { height:16px; background:#0b7f43; }
-    .row { position:relative; display:flex; align-items:center; justify-content:space-between; padding:36px 64px 0; }
-    .row img { height:52px; display:block; }
-    .progress { background:#0b7f43; color:#fff; font-weight:700; font-size:18px; padding:8px 18px; border-radius:999px; }
-    .headline { position:relative; flex:1; display:flex; align-items:center; padding:0 64px; }
-    .headline h2 { font-size:56px; line-height:1.18; font-weight:800; color:#151b18; }
-    .footer { position:relative; padding:0 64px 64px; }
-    .hint { color:#0b7f43; font-weight:700; font-size:22px; }
-    .cta-btn { background:#0b7f43; color:#fff; font-weight:700; font-size:28px; padding:22px 34px; border-radius:16px; display:inline-block; }
+    .canvas { width:1080px; height:1350px; background:#fff; display:flex; flex-direction:column; }
+    .bar { height:10px; background:#0b7f43; flex-shrink:0; }
+    .header { display:flex; align-items:center; gap:16px; padding:26px 56px 4px; flex-shrink:0; }
+    .number { width:52px; height:52px; border-radius:10px; background:#0b7f43; color:#fff; font-size:26px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .header img { height:42px; display:block; }
+    .header .tagline { color:#5c6b64; font-size:13px; margin-top:2px; }
+    .top-row { display:flex; gap:24px; padding:14px 56px 0; align-items:flex-start; flex-shrink:0; }
+    .headline-col { flex:1.15; min-width:0; }
+    .headline-col h2 { font-size:38px; line-height:1.16; font-weight:800; color:#151b18; }
+    .kicker { display:inline-block; margin-top:12px; background:#0b1f17; color:#fff; font-size:14px; font-weight:700; letter-spacing:.5px; padding:8px 14px; border-radius:8px; }
+    .photo-col { flex:0.85; flex-shrink:0; position:relative; border-radius:16px; overflow:hidden; height:230px; background:#e3f2ea; }
+    .photo-col img { width:100%; height:100%; object-fit:cover; display:block; }
+    .photo-badge { position:absolute; right:10px; bottom:10px; width:40px; height:40px; border-radius:50%; background:#0b7f43; color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; }
+    .modules { background:#0b1f17; margin:22px 56px 0; border-radius:16px; padding:22px 26px; flex-shrink:0; }
+    .modules h3 { color:#fff; font-size:15px; font-weight:700; margin-bottom:14px; letter-spacing:.3px; }
+    .c-feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px 16px; }
+    .c-feature { display:flex; align-items:center; gap:8px; color:#e7f3ec; font-size:13px; }
+    .c-feature-badge { flex-shrink:0; width:24px; height:24px; border-radius:50%; background:#0e7c46; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; }
+    .callout { background:#0e7c46; margin:18px 56px 0; border-radius:16px; padding:20px 26px; color:#fff; flex-shrink:0; }
+    .callout strong { display:block; font-size:16px; margin-bottom:5px; }
+    .callout span { font-size:14px; line-height:1.45; opacity:.95; }
+    .cta-bar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:18px 56px 0; padding:16px 20px; border-radius:14px; background:#f0f7f3; border:1px solid #d7ede1; flex-shrink:0; }
+    .cta-bar p { font-size:14px; color:#1c3a2c; font-weight:700; max-width:560px; }
+    .cta-bar .btn { background:#0b7f43; color:#fff; font-weight:700; font-size:15px; padding:12px 18px; border-radius:10px; white-space:nowrap; }
+    .spacer { flex:1; }
+    .footer { background:#0b1f17; display:flex; align-items:center; justify-content:space-between; padding:18px 56px; flex-shrink:0; }
+    .footer .brand img { height:26px; display:block; }
+    .footer .brand p { color:#a9c6b7; font-size:11px; margin-top:4px; }
+    .c-stats { display:flex; gap:18px; }
+    .c-stat { color:#cfe8db; font-size:10px; max-width:90px; line-height:1.3; }
   </style></head><body>
     <div class="canvas">
       <div class="bar"></div>
-      <div class="row"><img src="${logoUrl}" alt="Conforma360"/><span class="progress">${slideIndex + 1}/${total}</span></div>
-      <div class="headline"><h2>${headline}</h2></div>
-      <div class="footer">${isLast ? `<span class="cta-btn">${cta}</span>` : `<span class="hint">Arraste para o próximo →</span>`}</div>
+      <div class="header">
+        <div class="number">${slideIndex + 1}</div>
+        <img src="${logoUrl}" alt="Conforma360"/>
+        <div class="tagline">Conformidade é proteção.</div>
+      </div>
+      <div class="top-row">
+        <div class="headline-col"><h2>${headlineText}</h2>${kicker ? `<span class="kicker">${kicker}</span>` : ""}</div>
+        <div class="photo-col">${bgImage}<div class="photo-badge">✓</div></div>
+      </div>
+      <div class="modules"><h3>Uma plataforma integrada para Meio Ambiente, SST e Compliance</h3><div class="c-feature-grid">${BRAND_FEATURES.map(carouselFeatureItem).join("")}</div></div>
+      <div class="callout"><strong>Por que isso importa:</strong><span>${esc(BRAND_OBJECTIVE)}</span></div>
+      <div class="cta-bar"><p>${isLast ? "Fale com nossa equipe e tire suas dúvidas." : "Arraste para o próximo →"}</p><span class="btn">${cta}</span></div>
+      <div class="spacer"></div>
+      <div class="footer">
+        <div class="brand"><img src="${logoUrl}" alt="Conforma360"/><p>${esc(BRAND_TAGLINE)}</p></div>
+        <div class="c-stats">${BRAND_STATS.map(carouselStatItem).join("")}</div>
+      </div>
     </div>
   </body></html>`;
 }
