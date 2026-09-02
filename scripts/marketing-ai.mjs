@@ -1,13 +1,23 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { renderPostHtml, renderCarouselSlideHtml, renderHtmlToPng, closeBrowser } from "./creative-templates.mjs";
 
 const apiKey = process.env.ANTHROPIC_API_KEY;
 const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
 const supabaseUrl = process.env.MARKETING_SUPABASE_URL;
 const marketingKey = process.env.MARKETING_SUPABASE_KEY;
-// Opcional -- sem essa chave, os criativos saem no cartão de fundo liso
-// (design original), sem quebrar a campanha da semana.
+// Opcional -- sem essa chave, os slides de carrossel saem com fundo liso
+// (sem foto), sem quebrar a campanha da semana.
 const openaiApiKey = process.env.OPENAI_API_KEY;
+const logoUrl = process.env.CONFORMA360_LOGO_URL || "https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/Logo%20Conforma360.jpg";
+// 3 prints reais do produto (dashboard/painéis), alternados por
+// conteúdo -- nunca uma tela inventada por IA (a regra de "não invente
+// funcionalidades" vale pro visual também, não só pro texto).
+const mockupUrls = (process.env.MARKETING_MOCKUP_URLS || [
+  "https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/Painel/Capturar1.PNG",
+  "https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/Painel/Capturar2.PNG",
+  "https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/Painel/Capturar3.PNG",
+].join(",")).split(",").map((url) => url.trim()).filter(Boolean);
 
 if (!apiKey || !supabaseUrl || !marketingKey) {
   console.error("Secrets incompletos: ANTHROPIC_API_KEY, MARKETING_SUPABASE_URL e MARKETING_SUPABASE_KEY são obrigatórios.");
@@ -18,7 +28,6 @@ const hoje = new Date();
 const data = hoje.toISOString().slice(0, 10);
 const outputDir = path.resolve("marketing/generated");
 const outputFile = path.join(outputDir, `${data}-campanha-semanal.md`);
-const repoRawBase = "https://raw.githubusercontent.com/andrelrodrigues44/conforma-wise-360/main/marketing/generated";
 
 // A campanha tem 1 conteúdo por dia útil (campaign.dias, seção "Distribua
 // os 5 dias úteis..." no prompt) -- offset 0 é o próprio dia da geração
@@ -53,6 +62,9 @@ Distribua os 5 dias úteis entre dor/risco, educação, autoridade/prova, produt
 
 FORMATO
 Pelo menos 1 dos 5 dias deve usar formato "carrossel" (varia o formato da semana; use "post" nos demais, salvo se o tema realmente pedir carrossel — ex. passo a passo, antes/depois, checklist, mitos vs fatos). Quando formato for "carrossel", preencha "slides" com 3 a 6 frases curtas (uma por slide, cada uma cabendo num cartão visual): a primeira é o gancho/capa, as intermediárias desenvolvem o raciocínio, a última reforça o CTA. Quando formato for "post", deixe "slides" como array vazio.
+
+DESTAQUE NO HEADLINE
+Em "headline_destaque", copie um trecho de 2 a 5 palavras que exista EXATAMENTE dentro do "headline" (mesma pontuação e acentuação, cópia literal) — esse trecho é destacado em cor na peça visual. Escolha a parte mais forte do headline (o risco, o benefício ou o produto), nunca a frase inteira.
 
 TOM
 Português do Brasil. Técnico, objetivo, premium, claro e comercialmente responsável. Evite conteúdo genérico, frases vazias e promessas absolutas.
@@ -96,6 +108,7 @@ const schema = {
           dor_oportunidade: { type: "string" },
           objetivo: { type: "string" },
           headline: { type: "string" },
+          headline_destaque: { type: "string" },
           legenda: { type: "string" },
           cta: { type: "string" },
           criativo: { type: "string" },
@@ -103,7 +116,7 @@ const schema = {
           formato: { type: "string", enum: ["post", "carrossel"] },
           slides: { type: "array", items: { type: "string" } },
         },
-        required: ["dia", "canal", "linha_comercial", "tema", "dor_oportunidade", "objetivo", "headline", "legenda", "cta", "criativo", "metrica", "formato", "slides"],
+        required: ["dia", "canal", "linha_comercial", "tema", "dor_oportunidade", "objetivo", "headline", "headline_destaque", "legenda", "cta", "criativo", "metrica", "formato", "slides"],
       },
     },
     ativos_conversao: { type: "array", items: { type: "string" } },
@@ -151,41 +164,29 @@ async function supabase(pathname, options = {}) {
   return body ? JSON.parse(body) : null;
 }
 
-function esc(value) { return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
-
-// librsvg (motor usado pelo sharp pra converter SVG->PNG em
-// sync-marketing-creatives.mjs) não renderiza <foreignObject> de forma
-// confiável -- o headline ficava em branco na imagem final mesmo com o
-// SVG correto (texto SVG nativo, como o resto do cartão, sempre
-// renderizou). Quebra de linha manual por contagem de caracteres +
-// <tspan> por linha é a forma que funciona garantido em qualquer
-// conversor, não só em navegador.
-function wrapText(text, maxCharsPerLine) {
-  const words = esc(text).split(/\s+/).filter(Boolean);
-  const lines = [];
-  let current = "";
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word;
-    if (candidate.length > maxCharsPerLine && current) { lines.push(current); current = word; }
-    else current = candidate;
-  }
-  if (current) lines.push(current);
-  return lines;
-}
-function headlineTspans(text, { x, firstBaselineY, lineHeight, maxLines, maxCharsPerLine }) {
-  return wrapText(text, maxCharsPerLine).slice(0, maxLines).map((line, i) => `<tspan x="${x}" y="${firstBaselineY + i * lineHeight}">${line}</tspan>`).join("");
+const storageHeaders = { apikey: marketingKey, Authorization: `Bearer ${marketingKey}` };
+async function uploadImage(fileName, buffer) {
+  const objectPath = `generated/${fileName}`;
+  const res = await fetch(`${supabaseUrl}/storage/v1/object/marketing-creatives/${objectPath}`, {
+    method: "POST",
+    headers: { ...storageHeaders, "Content-Type": "image/png", "x-upsert": "true" },
+    body: buffer,
+  });
+  const body = await res.text();
+  if (!res.ok) throw new Error(`Storage ${res.status}: ${body}`);
+  return `${supabaseUrl}/storage/v1/object/public/marketing-creatives/${objectPath}`;
 }
 
-// Uma imagem de fundo por CONTEÚDO (não por slide) -- mais barato e,
-// pra carrossel, visualmente mais coerente manter o mesmo estilo de
-// fundo entre os slides (arrastar entre fotos totalmente diferentes
-// pareceria desconexo). O texto nunca é pedido à IA de imagem -- ela
-// erra letra com frequência; quem escreve o headline em cima é sempre o
-// nosso <text>/<tspan>, já corrigido pra renderizar garantido.
+// Uma imagem de fundo por CONTEÚDO de carrossel (não por slide) -- mais
+// barato e mantém o carrossel visualmente coerente entre os slides
+// (arrastar entre fotos totalmente diferentes pareceria desconexo). O
+// post único não usa mais fundo de IA -- usa o mockup real do produto
+// (renderPostHtml), então essa chamada só roda para itens carrossel. O
+// texto nunca é pedido à IA de imagem -- ela erra letra com frequência;
+// quem escreve o headline em cima é sempre o nosso HTML/CSS.
 function backgroundPrompt(item) {
   return `Fotografia editorial corporativa premium para post de LinkedIn/Instagram B2B brasileiro. Tema: ${item.tema}. Contexto: ${item.criativo}. Cenário profissional real ligado a conformidade, meio ambiente, saúde e segurança do trabalho ou compliance industrial, conforme o tema. Paleta com verde escuro (#0b7f43) presente na composição (roupa, objeto, luz ou elemento de cena), fundo neutro claro, iluminação suave e natural, composição limpa com espaço respirável à esquerda. Estilo fotográfico realista -- não ilustração, não 3D, não desenho, não infográfico. Proibido: qualquer texto, palavra, letra, número, logotipo, marca d'água, interface ou tipografia visível na imagem.`;
 }
-
 async function generateBackgroundImage(item) {
   if (!openaiApiKey) return null;
   try {
@@ -204,87 +205,46 @@ async function generateBackgroundImage(item) {
   }
 }
 
-// Com fundo de IA: painel translúcido garante contraste pro texto em
-// cima de qualquer foto (cor/claridade imprevisíveis). Sem fundo (chave
-// ausente ou falha): volta ao retângulo liso original.
-function backgroundLayer(backgroundDataUri) {
-  if (backgroundDataUri) return `<image href="${backgroundDataUri}" x="0" y="0" width="1080" height="1350" preserveAspectRatio="xMidYMid slice"/><rect x="40" y="40" width="1000" height="1270" rx="28" fill="#ffffff" fill-opacity="0.90"/>`;
-  return `<rect width="1080" height="1350" fill="#f5f7f6"/>`;
-}
-
-function creativeSvg(item, index, backgroundDataUri) {
-  const headlineText = headlineTspans(item.headline, { x: 80, firstBaselineY: 400, lineHeight: 70, maxLines: 7, maxCharsPerLine: 22 });
-  const theme = esc(item.tema).slice(0, 120);
-  const cta = esc(item.cta).slice(0, 90);
-  const line = item.linha_comercial === "consultoria" ? "CONSULTORIA" : item.linha_comercial === "plataforma" ? "PLATAFORMA" : "CONSULTORIA + PLATAFORMA";
-  const file = `${data}-criativo-${index + 1}.svg`;
-  // Nada de texto "prévia para aprovação"/rodapé de ferramenta interna
-  // aqui -- esta é a MESMA imagem que vira o post publicado depois de
-  // aprovada, então só pode conter o que faria sentido no post real.
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">${backgroundLayer(backgroundDataUri)}<rect width="1080" height="18" fill="#0b7f43"/><circle cx="930" cy="150" r="180" fill="#e3f2ea"/><circle cx="930" cy="150" r="105" fill="#d2eadc"/><text x="80" y="205" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4" fill="#6b7280">${esc(line)}</text><text x="80" y="270" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#0b7f43">${theme}</text><text font-family="Arial,sans-serif" font-size="64" font-weight="800" fill="#202124">${headlineText}</text><rect x="80" y="1050" rx="18" width="650" height="90" fill="#0b7f43"/><text x="115" y="1107" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="white">${cta}</text></svg>`;
-  return { file, svg };
-}
-
-// Um SVG por slide, mesmo cartão visual do post único (mesma logo/faixa
-// verde/moldura, adicionadas depois por sync-marketing-creatives.mjs).
-// Nome do arquivo carrega os dois índices (item da campanha + posição do
-// slide) -- é isso que sync-marketing-creatives.mjs usa pra agrupar os
-// arquivos de volta no mesmo conteúdo, sem depender de ordem de leitura
-// do disco.
-function carouselSvgs(item, index, backgroundDataUri) {
-  const line = item.linha_comercial === "consultoria" ? "CONSULTORIA" : item.linha_comercial === "plataforma" ? "PLATAFORMA" : "CONSULTORIA + PLATAFORMA";
-  const total = item.slides.length;
-  return item.slides.map((slideText, slideIndex) => {
-    const isLast = slideIndex === total - 1;
-    const headlineText = headlineTspans(slideText, { x: 80, firstBaselineY: 390, lineHeight: 66, maxLines: 8, maxCharsPerLine: 26 });
-    const file = `${data}-criativo-${index + 1}-slide-${slideIndex + 1}.svg`;
-    const progress = `${slideIndex + 1}/${total}`;
-    const ctaBlock = isLast
-      ? `<rect x="80" y="1050" rx="18" width="650" height="90" fill="#0b7f43"/><text x="115" y="1107" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="white">${esc(item.cta).slice(0, 90)}</text>`
-      : `<text x="80" y="1107" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#0b7f43">Arraste para o próximo →</text>`;
-    // Mesma regra do post único: nada de watermark/rodapé de ferramenta
-    // interna -- é a imagem que vira o slide publicado de verdade.
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">${backgroundLayer(backgroundDataUri)}<rect width="1080" height="18" fill="#0b7f43"/><circle cx="930" cy="150" r="180" fill="#e3f2ea"/><circle cx="930" cy="150" r="105" fill="#d2eadc"/><text x="80" y="205" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4" fill="#6b7280">${esc(line)}</text><rect x="895" y="55" rx="14" width="105" height="40" fill="#0b7f43"/><text x="947" y="82" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">${progress}</text><text font-family="Arial,sans-serif" font-size="58" font-weight="800" fill="#202124">${headlineText}</text>${ctaBlock}</svg>`;
-    return { file, svg };
-  });
-}
-
 const inserted = await supabase("marketing_campaigns?select=id", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify({ nome: `Campanha semanal — ${data}`, objetivo: campaign.objetivo_comercial, linha_comercial: "ambos", segmento: campaign.publico_prioritario, periodo_inicio: data, status: "rascunho" }) });
 const campaignId = inserted?.[0]?.id;
 if (!campaignId) throw new Error("Supabase não retornou o ID da campanha criada.");
 
-await fs.mkdir(outputDir, { recursive: true });
-// Limpa qualquer arquivo remanescente de uma rodada ANTERIOR NO MESMO
-// DIA (ex.: reexecução manual pra teste) antes de gerar os novos. Sem
-// isso, se um item mudar de formato entre rodadas (era carrossel virou
-// post, ou vice-versa), os arquivos de slide da rodada antiga ficam no
-// disco e sync-marketing-creatives.mjs os agrupa por engano com o
-// conteúdo novo daquela mesma posição -- imagem errada anexada a um
-// conteúdo real (bug confirmado, não só hipótese).
-const staleFiles = (await fs.readdir(outputDir)).filter((file) => file.startsWith(`${data}-criativo-`) || file === `${data}-campanha-semanal.md`);
-await Promise.all(staleFiles.map((file) => fs.rm(path.join(outputDir, file))));
+// Cada item é renderizado (HTML->PNG via Playwright) e enviado direto pro
+// Storage nesta mesma etapa -- nada de arquivo intermediário local pra
+// outro script reprocessar depois. Foi exatamente esse desenho de duas
+// fases (gerar local -> casar arquivo por nome de arquivo -> subir depois)
+// que causou os bugs de imagem órfã/trocada encontrados nesta sessão.
+const previaPorDia = [];
 for (const [index, item] of campaign.dias.entries()) {
   const isCarrossel = item.formato === "carrossel" && Array.isArray(item.slides) && item.slides.length >= 2;
-  // 1 fundo por conteúdo, reaproveitado em todos os slides (custo menor
-  // e visual coerente ao arrastar o carrossel). null = sem OPENAI_API_KEY
-  // configurada ou a chamada falhou -- creativeSvg/carouselSvgs caem pro
-  // fundo liso original nesse caso.
-  const backgroundDataUri = await generateBackgroundImage(item);
-  let creativeUrl;
+  let urls;
   if (isCarrossel) {
-    const slides = carouselSvgs(item, index, backgroundDataUri);
-    for (const slide of slides) await fs.writeFile(path.join(outputDir, slide.file), slide.svg, "utf8");
-    creativeUrl = `${repoRawBase}/${slides[0].file}`;
+    const backgroundDataUri = await generateBackgroundImage(item);
+    const total = item.slides.length;
+    urls = [];
+    for (const [slideIndex, slideText] of item.slides.entries()) {
+      const html = renderCarouselSlideHtml({ item, slideText, slideIndex, total, isLast: slideIndex === total - 1, logoUrl, backgroundDataUri });
+      const png = await renderHtmlToPng(html, { width: 1080, height: 1350 });
+      urls.push(await uploadImage(`${data}-criativo-${index + 1}-slide-${slideIndex + 1}.png`, png));
+    }
   } else {
-    const creative = creativeSvg(item, index, backgroundDataUri);
-    await fs.writeFile(path.join(outputDir, creative.file), creative.svg, "utf8");
-    creativeUrl = `${repoRawBase}/${creative.file}`;
+    const mockupUrl = mockupUrls[index % mockupUrls.length];
+    const html = renderPostHtml({ item, logoUrl, mockupUrl });
+    const png = await renderHtmlToPng(html, { width: 1080, fullPage: true });
+    urls = [await uploadImage(`${data}-criativo-${index + 1}.png`, png)];
   }
-  await supabase("marketing_contents", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ campaign_id: campaignId, canal: item.canal, formato: isCarrossel ? "carrossel" : "post", linha_comercial: item.linha_comercial, titulo: item.headline, legenda: item.legenda, cta: item.cta, criativo_brief: `${item.tema}. Dor/oportunidade: ${item.dor_oportunidade}. Criativo: ${item.criativo}. Métrica: ${item.metrica}.`, criativo_url: creativeUrl, criativo_alt: `Prévia Conforma360: ${item.headline}`, data_publicacao: addBusinessDaysIso(data, index), status: "revisar" }) });
+  previaPorDia.push(urls);
+  await supabase("marketing_contents", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ campaign_id: campaignId, canal: item.canal, formato: isCarrossel ? "carrossel" : "post", linha_comercial: item.linha_comercial, titulo: item.headline, legenda: item.legenda, cta: item.cta, criativo_brief: `${item.tema}. Dor/oportunidade: ${item.dor_oportunidade}. Criativo: ${item.criativo}. Métrica: ${item.metrica}.`, criativo_url: urls[0], criativo_urls: urls, criativo_alt: `Prévia Conforma360: ${item.headline}`, data_publicacao: addBusinessDaysIso(data, index), status: "revisar" }) });
 }
+await closeBrowser();
 
+await fs.mkdir(outputDir, { recursive: true });
 const lines = [`# Campanha semanal — ${data}`, "## Objetivo comercial", campaign.objetivo_comercial, "## Público prioritário", campaign.publico_prioritario, "## Oferta principal", campaign.oferta_principal, "## Estratégia de aquisição", campaign.estrategia_aquisicao, "## Calendário"];
-campaign.dias.forEach((item, index) => { const isCarrossel = item.formato === "carrossel" && Array.isArray(item.slides) && item.slides.length >= 2; const previaLine = isCarrossel ? `- Prévia visual (carrossel, ${item.slides.length} slides): ${item.slides.map((_, slideIndex) => `${repoRawBase}/${data}-criativo-${index + 1}-slide-${slideIndex + 1}.svg`).join(", ")}` : `- Prévia visual: ${repoRawBase}/${data}-criativo-${index + 1}.svg`; lines.push(`### Dia ${index + 1} — ${item.dia}`, `- Canal: ${item.canal}`, `- Formato: ${isCarrossel ? "carrossel" : "post"}`, `- Linha comercial: ${item.linha_comercial}`, `- Tema: ${item.tema}`, `- Dor ou oportunidade: ${item.dor_oportunidade}`, `- Objetivo: ${item.objetivo}`, `- Headline: ${item.headline}`, `- Legenda completa: ${item.legenda}`, `- CTA: ${item.cta}`, `- Ideia de criativo: ${item.criativo}`, `- Métrica principal: ${item.metrica}`, previaLine); });
+campaign.dias.forEach((item, index) => {
+  const isCarrossel = item.formato === "carrossel" && Array.isArray(item.slides) && item.slides.length >= 2;
+  const previaLine = `- Prévia visual${isCarrossel ? ` (carrossel, ${previaPorDia[index].length} slides)` : ""}: ${previaPorDia[index].join(", ")}`;
+  lines.push(`### Dia ${index + 1} — ${item.dia}`, `- Canal: ${item.canal}`, `- Formato: ${isCarrossel ? "carrossel" : "post"}`, `- Linha comercial: ${item.linha_comercial}`, `- Tema: ${item.tema}`, `- Dor ou oportunidade: ${item.dor_oportunidade}`, `- Objetivo: ${item.objetivo}`, `- Headline: ${item.headline}`, `- Legenda completa: ${item.legenda}`, `- CTA: ${item.cta}`, `- Ideia de criativo: ${item.criativo}`, `- Métrica principal: ${item.metrica}`, previaLine);
+});
 lines.push("## Ativos de conversão", ...campaign.ativos_conversao.map((x) => `- ${x}`), "## Sequência de follow-up", ...campaign.followups.map((x) => `- ${x}`), "## Hipóteses de teste", ...campaign.testes_ab.map((x) => `- ${x}`), "## Próximas ações comerciais", ...campaign.proximas_acoes.map((x) => `- ${x}`), "## Critérios de aprovação", ...campaign.criterios_aprovacao.map((x) => `- ${x}`), "", "---", "Gerado automaticamente pelo CONFORMA360 Marketing AI.");
 await fs.writeFile(outputFile, `${lines.join("\n")}\n`, "utf8");
 console.log(`Campanha gerada e persistida: ${outputFile} | campaign_id=${campaignId} | conteúdos=${campaign.dias.length}`);

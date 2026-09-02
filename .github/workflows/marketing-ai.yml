@@ -20,6 +20,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Instalar Playwright (Chromium)
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
       - name: Generate weekly campaign
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -27,19 +32,11 @@ jobs:
           MARKETING_SUPABASE_URL: ${{ secrets.MARKETING_SUPABASE_URL }}
           MARKETING_SUPABASE_KEY: ${{ secrets.MARKETING_SUPABASE_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CONFORMA360_LOGO_URL: ${{ vars.CONFORMA360_LOGO_URL }}
+          MARKETING_MOCKUP_URLS: ${{ vars.MARKETING_MOCKUP_URLS }}
         run: node scripts/marketing-ai.mjs
 
-      - name: Instalar Sharp
-        run: npm install --no-save sharp
-
-      - name: Upload and link creative previews
-        env:
-          MARKETING_SUPABASE_URL: ${{ secrets.MARKETING_SUPABASE_URL }}
-          MARKETING_SUPABASE_KEY: ${{ secrets.MARKETING_SUPABASE_KEY }}
-          CONFORMA360_LOGO_URL: ${{ vars.CONFORMA360_LOGO_URL }}
-        run: node scripts/sync-marketing-creatives.mjs
-
-      - name: Commit generated campaign and creatives
+      - name: Commit generated campaign summary
         run: |
           git config user.name "conforma360-marketing-ai[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -48,5 +45,5 @@ jobs:
             echo "Nenhuma alteração local para commitar."
             exit 0
           fi
-          git commit -m "chore(marketing): gera campanha e sincroniza criativos"
+          git commit -m "chore(marketing): gera resumo da campanha semanal"
           git push
