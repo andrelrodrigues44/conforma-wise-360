@@ -20,20 +20,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Instalar Playwright (Chromium)
-        run: |
-          npm install --no-save playwright
-          npx playwright install --with-deps chromium
-
       - name: Generate weekly campaign
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
           MARKETING_SUPABASE_URL: ${{ secrets.MARKETING_SUPABASE_URL }}
           MARKETING_SUPABASE_KEY: ${{ secrets.MARKETING_SUPABASE_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          CONFORMA360_LOGO_URL: ${{ vars.CONFORMA360_LOGO_URL }}
-          MARKETING_MOCKUP_URLS: ${{ vars.MARKETING_MOCKUP_URLS }}
         run: node scripts/marketing-ai.mjs
 
       - name: Commit generated campaign summary

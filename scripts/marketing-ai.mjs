@@ -1,23 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { renderPostHtml, renderCarouselSlideHtml, renderHtmlToPng, closeBrowser } from "./creative-templates.mjs";
 
 const apiKey = process.env.ANTHROPIC_API_KEY;
 const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
 const supabaseUrl = process.env.MARKETING_SUPABASE_URL;
 const marketingKey = process.env.MARKETING_SUPABASE_KEY;
-// Opcional -- sem essa chave, os slides de carrossel saem com fundo liso
-// (sem foto), sem quebrar a campanha da semana.
-const openaiApiKey = process.env.OPENAI_API_KEY;
-const logoUrl = process.env.CONFORMA360_LOGO_URL || "https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/Logo%20Conforma360.jpg";
-// 3 prints reais do produto (dashboard/painéis), alternados por
-// conteúdo -- nunca uma tela inventada por IA (a regra de "não invente
-// funcionalidades" vale pro visual também, não só pro texto).
-const mockupUrls = (process.env.MARKETING_MOCKUP_URLS || [
-  "https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/Painel/Capturar1.PNG",
-  "https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/Painel/Capturar2.PNG",
-  "https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/Painel/Capturar3.PNG",
-].join(",")).split(",").map((url) => url.trim()).filter(Boolean);
 
 if (!apiKey || !supabaseUrl || !marketingKey) {
   console.error("Secrets incompletos: ANTHROPIC_API_KEY, MARKETING_SUPABASE_URL e MARKETING_SUPABASE_KEY são obrigatórios.");
@@ -64,7 +51,7 @@ FORMATO
 Pelo menos 1 dos 5 dias deve usar formato "carrossel" (varia o formato da semana; use "post" nos demais, salvo se o tema realmente pedir carrossel — ex. passo a passo, antes/depois, checklist, mitos vs fatos). Quando formato for "carrossel", preencha "slides" com 3 a 6 frases curtas (uma por slide, cada uma cabendo num cartão visual): a primeira é o gancho/capa, as intermediárias desenvolvem o raciocínio, a última reforça o CTA. Quando formato for "post", deixe "slides" como array vazio.
 
 DESTAQUE NO HEADLINE
-Em "headline_destaque", copie um trecho de 2 a 5 palavras que exista EXATAMENTE dentro do "headline" (mesma pontuação e acentuação, cópia literal) — esse trecho é destacado em cor na peça visual. Escolha a parte mais forte do headline (o risco, o benefício ou o produto), nunca a frase inteira.
+Em "headline_destaque", copie um trecho de 2 a 5 palavras que exista EXATAMENTE dentro do "headline" (mesma pontuação e acentuação, cópia literal) — esse trecho é o que deve ser destacado em cor quando a peça visual for montada. Escolha a parte mais forte do headline (o risco, o benefício ou o produto), nunca a frase inteira.
 
 TOM
 Português do Brasil. Técnico, objetivo, premium, claro e comercialmente responsável. Evite conteúdo genérico, frases vazias e promessas absolutas.
@@ -164,86 +151,29 @@ async function supabase(pathname, options = {}) {
   return body ? JSON.parse(body) : null;
 }
 
-const storageHeaders = { apikey: marketingKey, Authorization: `Bearer ${marketingKey}` };
-async function uploadImage(fileName, buffer) {
-  const objectPath = `generated/${fileName}`;
-  const res = await fetch(`${supabaseUrl}/storage/v1/object/marketing-creatives/${objectPath}`, {
-    method: "POST",
-    headers: { ...storageHeaders, "Content-Type": "image/png", "x-upsert": "true" },
-    body: buffer,
-  });
-  const body = await res.text();
-  if (!res.ok) throw new Error(`Storage ${res.status}: ${body}`);
-  return `${supabaseUrl}/storage/v1/object/public/marketing-creatives/${objectPath}`;
-}
-
-// Uma imagem de fundo por CONTEÚDO de carrossel (não por slide) -- mais
-// barato e mantém o carrossel visualmente coerente entre os slides
-// (arrastar entre fotos totalmente diferentes pareceria desconexo). O
-// post único não usa mais fundo de IA -- usa o mockup real do produto
-// (renderPostHtml), então essa chamada só roda para itens carrossel. O
-// texto nunca é pedido à IA de imagem -- ela erra letra com frequência;
-// quem escreve o headline em cima é sempre o nosso HTML/CSS.
-function backgroundPrompt(item) {
-  return `Fotografia editorial corporativa premium para post de LinkedIn/Instagram B2B brasileiro. Tema: ${item.tema}. Contexto: ${item.criativo}. Cenário profissional real ligado a conformidade, meio ambiente, saúde e segurança do trabalho ou compliance industrial, conforme o tema. Paleta com verde escuro (#0b7f43) presente na composição (roupa, objeto, luz ou elemento de cena), fundo neutro claro, iluminação suave e natural, composição limpa com espaço respirável à esquerda. Estilo fotográfico realista -- não ilustração, não 3D, não desenho, não infográfico. Proibido: qualquer texto, palavra, letra, número, logotipo, marca d'água, interface ou tipografia visível na imagem.`;
-}
-async function generateBackgroundImage(item) {
-  if (!openaiApiKey) return null;
-  try {
-    const response = await fetch("https://api.openai.com/v1/images/generations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiApiKey}` },
-      body: JSON.stringify({ model: "gpt-image-1", prompt: backgroundPrompt(item), size: "1024x1536", quality: "medium", n: 1 }),
-    });
-    if (!response.ok) { console.error(`OpenAI Images ${response.status}: ${(await response.text()).slice(0, 300)} -- usando fundo padrão.`); return null; }
-    const json = await response.json();
-    const b64 = json?.data?.[0]?.b64_json;
-    return b64 ? `data:image/png;base64,${b64}` : null;
-  } catch (error) {
-    console.error(`Falha ao gerar imagem de fundo (${error.message}) -- usando fundo padrão.`);
-    return null;
-  }
-}
-
 const inserted = await supabase("marketing_campaigns?select=id", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify({ nome: `Campanha semanal — ${data}`, objetivo: campaign.objetivo_comercial, linha_comercial: "ambos", segmento: campaign.publico_prioritario, periodo_inicio: data, status: "rascunho" }) });
 const campaignId = inserted?.[0]?.id;
 if (!campaignId) throw new Error("Supabase não retornou o ID da campanha criada.");
 
-// Cada item é renderizado (HTML->PNG via Playwright) e enviado direto pro
-// Storage nesta mesma etapa -- nada de arquivo intermediário local pra
-// outro script reprocessar depois. Foi exatamente esse desenho de duas
-// fases (gerar local -> casar arquivo por nome de arquivo -> subir depois)
-// que causou os bugs de imagem órfã/trocada encontrados nesta sessão.
-const previaPorDia = [];
+// A IA só prepara o TEXTO -- a arte é feita fora e anexada manualmente
+// pelo painel (upload direto, inclusive do celular). criativo_url nasce
+// vazio; quando é carrossel, o roteiro completo dos slides (o que cada
+// imagem precisa dizer, na ordem) vai dentro de criativo_brief, pra
+// quem for desenhar saber exatamente o texto de cada slide.
 for (const [index, item] of campaign.dias.entries()) {
   const isCarrossel = item.formato === "carrossel" && Array.isArray(item.slides) && item.slides.length >= 2;
-  let urls;
-  if (isCarrossel) {
-    const backgroundDataUri = await generateBackgroundImage(item);
-    const total = item.slides.length;
-    urls = [];
-    for (const [slideIndex, slideText] of item.slides.entries()) {
-      const html = renderCarouselSlideHtml({ item, slideText, slideIndex, total, isLast: slideIndex === total - 1, logoUrl, backgroundDataUri });
-      const png = await renderHtmlToPng(html, { width: 1080, height: 1350 });
-      urls.push(await uploadImage(`${data}-criativo-${index + 1}-slide-${slideIndex + 1}.png`, png));
-    }
-  } else {
-    const mockupUrl = mockupUrls[index % mockupUrls.length];
-    const html = renderPostHtml({ item, logoUrl, mockupUrl });
-    const png = await renderHtmlToPng(html, { width: 1080, fullPage: true });
-    urls = [await uploadImage(`${data}-criativo-${index + 1}.png`, png)];
-  }
-  previaPorDia.push(urls);
-  await supabase("marketing_contents", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ campaign_id: campaignId, canal: item.canal, formato: isCarrossel ? "carrossel" : "post", linha_comercial: item.linha_comercial, titulo: item.headline, legenda: item.legenda, cta: item.cta, criativo_brief: `${item.tema}. Dor/oportunidade: ${item.dor_oportunidade}. Criativo: ${item.criativo}. Métrica: ${item.metrica}.`, criativo_url: urls[0], criativo_urls: urls, criativo_alt: `Prévia Conforma360: ${item.headline}`, data_publicacao: addBusinessDaysIso(data, index), status: "revisar" }) });
+  const brief = isCarrossel
+    ? `${item.tema}. Dor/oportunidade: ${item.dor_oportunidade}. Criativo: ${item.criativo}. Métrica: ${item.metrica}.\n\nRoteiro do carrossel (${item.slides.length} slides, nesta ordem):\n${item.slides.map((s, i) => `${i + 1}) ${s}`).join("\n")}\n\nDestaque no headline principal: "${item.headline_destaque}".`
+    : `${item.tema}. Dor/oportunidade: ${item.dor_oportunidade}. Criativo: ${item.criativo}. Métrica: ${item.metrica}.\n\nDestaque no headline: "${item.headline_destaque}".`;
+  await supabase("marketing_contents", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ campaign_id: campaignId, canal: item.canal, formato: isCarrossel ? "carrossel" : "post", linha_comercial: item.linha_comercial, titulo: item.headline, legenda: item.legenda, cta: item.cta, criativo_brief: brief, data_publicacao: addBusinessDaysIso(data, index), status: "revisar" }) });
 }
-await closeBrowser();
 
 await fs.mkdir(outputDir, { recursive: true });
 const lines = [`# Campanha semanal — ${data}`, "## Objetivo comercial", campaign.objetivo_comercial, "## Público prioritário", campaign.publico_prioritario, "## Oferta principal", campaign.oferta_principal, "## Estratégia de aquisição", campaign.estrategia_aquisicao, "## Calendário"];
 campaign.dias.forEach((item, index) => {
   const isCarrossel = item.formato === "carrossel" && Array.isArray(item.slides) && item.slides.length >= 2;
-  const previaLine = `- Prévia visual${isCarrossel ? ` (carrossel, ${previaPorDia[index].length} slides)` : ""}: ${previaPorDia[index].join(", ")}`;
-  lines.push(`### Dia ${index + 1} — ${item.dia}`, `- Canal: ${item.canal}`, `- Formato: ${isCarrossel ? "carrossel" : "post"}`, `- Linha comercial: ${item.linha_comercial}`, `- Tema: ${item.tema}`, `- Dor ou oportunidade: ${item.dor_oportunidade}`, `- Objetivo: ${item.objetivo}`, `- Headline: ${item.headline}`, `- Legenda completa: ${item.legenda}`, `- CTA: ${item.cta}`, `- Ideia de criativo: ${item.criativo}`, `- Métrica principal: ${item.metrica}`, previaLine);
+  lines.push(`### Dia ${index + 1} — ${item.dia}`, `- Canal: ${item.canal}`, `- Formato: ${isCarrossel ? "carrossel" : "post"}`, `- Linha comercial: ${item.linha_comercial}`, `- Tema: ${item.tema}`, `- Dor ou oportunidade: ${item.dor_oportunidade}`, `- Objetivo: ${item.objetivo}`, `- Headline: ${item.headline}`, `- Destaque do headline: ${item.headline_destaque}`, `- Legenda completa: ${item.legenda}`, `- CTA: ${item.cta}`, `- Ideia de criativo: ${item.criativo}`, `- Métrica principal: ${item.metrica}`);
+  if (isCarrossel) lines.push(`- Roteiro do carrossel (${item.slides.length} slides):`, ...item.slides.map((s, i) => `  ${i + 1}) ${s}`));
 });
 lines.push("## Ativos de conversão", ...campaign.ativos_conversao.map((x) => `- ${x}`), "## Sequência de follow-up", ...campaign.followups.map((x) => `- ${x}`), "## Hipóteses de teste", ...campaign.testes_ab.map((x) => `- ${x}`), "## Próximas ações comerciais", ...campaign.proximas_acoes.map((x) => `- ${x}`), "## Critérios de aprovação", ...campaign.criterios_aprovacao.map((x) => `- ${x}`), "", "---", "Gerado automaticamente pelo CONFORMA360 Marketing AI.");
 await fs.writeFile(outputFile, `${lines.join("\n")}\n`, "utf8");

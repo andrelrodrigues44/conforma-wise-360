@@ -21,6 +21,7 @@ import { Route as ApiAdminDashboardRouteImport } from './routes/api/admin/dashbo
 import { Route as ApiAdminLoginRouteImport } from './routes/api/admin/login'
 import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
 import { Route as ApiAdminManageRouteImport } from './routes/api/admin/manage'
+import { Route as ApiAdminUploadRouteImport } from './routes/api/admin/upload'
 import { Route as ApiPublicCapturarLeadSiteRouteImport } from './routes/api/public/capturar-lead-site'
 
 const IndexRoute = IndexRouteImport.update({
@@ -83,6 +84,11 @@ const ApiAdminManageRoute = ApiAdminManageRouteImport.update({
   path: '/api/admin/manage',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminUploadRoute = ApiAdminUploadRouteImport.update({
+  id: '/api/admin/upload',
+  path: '/api/admin/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCapturarLeadSiteRoute =
   ApiPublicCapturarLeadSiteRouteImport.update({
     id: '/api/public/capturar-lead-site',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/manage': typeof ApiAdminManageRoute
+  '/api/admin/upload': typeof ApiAdminUploadRoute
   '/api/public/capturar-lead-site': typeof ApiPublicCapturarLeadSiteRoute
 }
 export interface FileRoutesByTo {
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/manage': typeof ApiAdminManageRoute
+  '/api/admin/upload': typeof ApiAdminUploadRoute
   '/api/public/capturar-lead-site': typeof ApiPublicCapturarLeadSiteRoute
 }
 export interface FileRoutesById {
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
   '/api/admin/manage': typeof ApiAdminManageRoute
+  '/api/admin/upload': typeof ApiAdminUploadRoute
   '/api/public/capturar-lead-site': typeof ApiPublicCapturarLeadSiteRoute
 }
 export interface FileRouteTypes {
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/api/admin/login'
     | '/api/admin/logout'
     | '/api/admin/manage'
+    | '/api/admin/upload'
     | '/api/public/capturar-lead-site'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/api/admin/login'
     | '/api/admin/logout'
     | '/api/admin/manage'
+    | '/api/admin/upload'
     | '/api/public/capturar-lead-site'
   id:
     | '__root__'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/api/admin/login'
     | '/api/admin/logout'
     | '/api/admin/manage'
+    | '/api/admin/upload'
     | '/api/public/capturar-lead-site'
   fileRoutesById: FileRoutesById
 }
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
   ApiAdminLogoutRoute: typeof ApiAdminLogoutRoute
   ApiAdminManageRoute: typeof ApiAdminManageRoute
+  ApiAdminUploadRoute: typeof ApiAdminUploadRoute
   ApiPublicCapturarLeadSiteRoute: typeof ApiPublicCapturarLeadSiteRoute
 }
 
@@ -286,6 +299,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminManageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/upload': {
+      id: '/api/admin/upload'
+      path: '/api/admin/upload'
+      fullPath: '/api/admin/upload'
+      preLoaderRoute: typeof ApiAdminUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/capturar-lead-site': {
       id: '/api/public/capturar-lead-site'
       path: '/api/public/capturar-lead-site'
@@ -309,6 +329,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminLoginRoute: ApiAdminLoginRoute,
   ApiAdminLogoutRoute: ApiAdminLogoutRoute,
   ApiAdminManageRoute: ApiAdminManageRoute,
+  ApiAdminUploadRoute: ApiAdminUploadRoute,
   ApiPublicCapturarLeadSiteRoute: ApiPublicCapturarLeadSiteRoute,
 }
 export const routeTree = rootRouteImport
