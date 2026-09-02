@@ -254,6 +254,15 @@ const campaignId = inserted?.[0]?.id;
 if (!campaignId) throw new Error("Supabase não retornou o ID da campanha criada.");
 
 await fs.mkdir(outputDir, { recursive: true });
+// Limpa qualquer arquivo remanescente de uma rodada ANTERIOR NO MESMO
+// DIA (ex.: reexecução manual pra teste) antes de gerar os novos. Sem
+// isso, se um item mudar de formato entre rodadas (era carrossel virou
+// post, ou vice-versa), os arquivos de slide da rodada antiga ficam no
+// disco e sync-marketing-creatives.mjs os agrupa por engano com o
+// conteúdo novo daquela mesma posição -- imagem errada anexada a um
+// conteúdo real (bug confirmado, não só hipótese).
+const staleFiles = (await fs.readdir(outputDir)).filter((file) => file.startsWith(`${data}-criativo-`) || file === `${data}-campanha-semanal.md`);
+await Promise.all(staleFiles.map((file) => fs.rm(path.join(outputDir, file))));
 for (const [index, item] of campaign.dias.entries()) {
   const isCarrossel = item.formato === "carrossel" && Array.isArray(item.slides) && item.slides.length >= 2;
   // 1 fundo por conteúdo, reaproveitado em todos os slides (custo menor
