@@ -26,6 +26,7 @@ jobs:
           ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
           MARKETING_SUPABASE_URL: ${{ secrets.MARKETING_SUPABASE_URL }}
           MARKETING_SUPABASE_KEY: ${{ secrets.MARKETING_SUPABASE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: node scripts/marketing-ai.mjs
 
       - name: Instalar Sharp

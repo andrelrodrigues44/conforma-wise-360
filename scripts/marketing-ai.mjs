@@ -5,6 +5,9 @@ const apiKey = process.env.ANTHROPIC_API_KEY;
 const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
 const supabaseUrl = process.env.MARKETING_SUPABASE_URL;
 const marketingKey = process.env.MARKETING_SUPABASE_KEY;
+// Opcional -- sem essa chave, os criativos saem no cartão de fundo liso
+// (design original), sem quebrar a campanha da semana.
+const openaiApiKey = process.env.OPENAI_API_KEY;
 
 if (!apiKey || !supabaseUrl || !marketingKey) {
   console.error("Secrets incompletos: ANTHROPIC_API_KEY, MARKETING_SUPABASE_URL e MARKETING_SUPABASE_KEY são obrigatórios.");
@@ -173,7 +176,43 @@ function headlineTspans(text, { x, firstBaselineY, lineHeight, maxLines, maxChar
   return wrapText(text, maxCharsPerLine).slice(0, maxLines).map((line, i) => `<tspan x="${x}" y="${firstBaselineY + i * lineHeight}">${line}</tspan>`).join("");
 }
 
-function creativeSvg(item, index) {
+// Uma imagem de fundo por CONTEÚDO (não por slide) -- mais barato e,
+// pra carrossel, visualmente mais coerente manter o mesmo estilo de
+// fundo entre os slides (arrastar entre fotos totalmente diferentes
+// pareceria desconexo). O texto nunca é pedido à IA de imagem -- ela
+// erra letra com frequência; quem escreve o headline em cima é sempre o
+// nosso <text>/<tspan>, já corrigido pra renderizar garantido.
+function backgroundPrompt(item) {
+  return `Fotografia editorial corporativa premium para post de LinkedIn/Instagram B2B brasileiro. Tema: ${item.tema}. Contexto: ${item.criativo}. Cenário profissional real ligado a conformidade, meio ambiente, saúde e segurança do trabalho ou compliance industrial, conforme o tema. Paleta com verde escuro (#0b7f43) presente na composição (roupa, objeto, luz ou elemento de cena), fundo neutro claro, iluminação suave e natural, composição limpa com espaço respirável à esquerda. Estilo fotográfico realista -- não ilustração, não 3D, não desenho, não infográfico. Proibido: qualquer texto, palavra, letra, número, logotipo, marca d'água, interface ou tipografia visível na imagem.`;
+}
+
+async function generateBackgroundImage(item) {
+  if (!openaiApiKey) return null;
+  try {
+    const response = await fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiApiKey}` },
+      body: JSON.stringify({ model: "gpt-image-1", prompt: backgroundPrompt(item), size: "1024x1536", quality: "medium", n: 1 }),
+    });
+    if (!response.ok) { console.error(`OpenAI Images ${response.status}: ${(await response.text()).slice(0, 300)} -- usando fundo padrão.`); return null; }
+    const json = await response.json();
+    const b64 = json?.data?.[0]?.b64_json;
+    return b64 ? `data:image/png;base64,${b64}` : null;
+  } catch (error) {
+    console.error(`Falha ao gerar imagem de fundo (${error.message}) -- usando fundo padrão.`);
+    return null;
+  }
+}
+
+// Com fundo de IA: painel translúcido garante contraste pro texto em
+// cima de qualquer foto (cor/claridade imprevisíveis). Sem fundo (chave
+// ausente ou falha): volta ao retângulo liso original.
+function backgroundLayer(backgroundDataUri) {
+  if (backgroundDataUri) return `<image href="${backgroundDataUri}" x="0" y="0" width="1080" height="1350" preserveAspectRatio="xMidYMid slice"/><rect x="40" y="40" width="1000" height="1270" rx="28" fill="#ffffff" fill-opacity="0.90"/>`;
+  return `<rect width="1080" height="1350" fill="#f5f7f6"/>`;
+}
+
+function creativeSvg(item, index, backgroundDataUri) {
   const headlineText = headlineTspans(item.headline, { x: 80, firstBaselineY: 400, lineHeight: 70, maxLines: 7, maxCharsPerLine: 22 });
   const theme = esc(item.tema).slice(0, 120);
   const cta = esc(item.cta).slice(0, 90);
@@ -182,7 +221,7 @@ function creativeSvg(item, index) {
   // Nada de texto "prévia para aprovação"/rodapé de ferramenta interna
   // aqui -- esta é a MESMA imagem que vira o post publicado depois de
   // aprovada, então só pode conter o que faria sentido no post real.
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#f5f7f6"/><rect width="1080" height="18" fill="#0b7f43"/><circle cx="930" cy="150" r="180" fill="#e3f2ea"/><circle cx="930" cy="150" r="105" fill="#d2eadc"/><text x="80" y="105" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="7" fill="#0b7f43">CONFORMA360</text><text x="80" y="155" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4" fill="#6b7280">${esc(line)}</text><text x="80" y="270" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#0b7f43">${theme}</text><text font-family="Arial,sans-serif" font-size="64" font-weight="800" fill="#202124">${headlineText}</text><rect x="80" y="1050" rx="18" width="650" height="90" fill="#0b7f43"/><text x="115" y="1107" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="white">${cta}</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">${backgroundLayer(backgroundDataUri)}<rect width="1080" height="18" fill="#0b7f43"/><circle cx="930" cy="150" r="180" fill="#e3f2ea"/><circle cx="930" cy="150" r="105" fill="#d2eadc"/><text x="80" y="105" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="7" fill="#0b7f43">CONFORMA360</text><text x="80" y="155" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4" fill="#6b7280">${esc(line)}</text><text x="80" y="270" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#0b7f43">${theme}</text><text font-family="Arial,sans-serif" font-size="64" font-weight="800" fill="#202124">${headlineText}</text><rect x="80" y="1050" rx="18" width="650" height="90" fill="#0b7f43"/><text x="115" y="1107" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="white">${cta}</text></svg>`;
   return { file, svg };
 }
 
@@ -192,7 +231,7 @@ function creativeSvg(item, index) {
 // slide) -- é isso que sync-marketing-creatives.mjs usa pra agrupar os
 // arquivos de volta no mesmo conteúdo, sem depender de ordem de leitura
 // do disco.
-function carouselSvgs(item, index) {
+function carouselSvgs(item, index, backgroundDataUri) {
   const line = item.linha_comercial === "consultoria" ? "CONSULTORIA" : item.linha_comercial === "plataforma" ? "PLATAFORMA" : "CONSULTORIA + PLATAFORMA";
   const total = item.slides.length;
   return item.slides.map((slideText, slideIndex) => {
@@ -205,7 +244,7 @@ function carouselSvgs(item, index) {
       : `<text x="80" y="1107" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#0b7f43">Arraste para o próximo →</text>`;
     // Mesma regra do post único: nada de watermark/rodapé de ferramenta
     // interna -- é a imagem que vira o slide publicado de verdade.
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#f5f7f6"/><rect width="1080" height="18" fill="#0b7f43"/><circle cx="930" cy="150" r="180" fill="#e3f2ea"/><circle cx="930" cy="150" r="105" fill="#d2eadc"/><text x="80" y="105" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="7" fill="#0b7f43">CONFORMA360</text><text x="80" y="155" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4" fill="#6b7280">${esc(line)}</text><rect x="895" y="55" rx="14" width="105" height="40" fill="#0b7f43"/><text x="947" y="82" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">${progress}</text><text font-family="Arial,sans-serif" font-size="58" font-weight="800" fill="#202124">${headlineText}</text>${ctaBlock}</svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">${backgroundLayer(backgroundDataUri)}<rect width="1080" height="18" fill="#0b7f43"/><circle cx="930" cy="150" r="180" fill="#e3f2ea"/><circle cx="930" cy="150" r="105" fill="#d2eadc"/><text x="80" y="105" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="7" fill="#0b7f43">CONFORMA360</text><text x="80" y="155" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4" fill="#6b7280">${esc(line)}</text><rect x="895" y="55" rx="14" width="105" height="40" fill="#0b7f43"/><text x="947" y="82" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="white" text-anchor="middle">${progress}</text><text font-family="Arial,sans-serif" font-size="58" font-weight="800" fill="#202124">${headlineText}</text>${ctaBlock}</svg>`;
     return { file, svg };
   });
 }
@@ -217,13 +256,18 @@ if (!campaignId) throw new Error("Supabase não retornou o ID da campanha criada
 await fs.mkdir(outputDir, { recursive: true });
 for (const [index, item] of campaign.dias.entries()) {
   const isCarrossel = item.formato === "carrossel" && Array.isArray(item.slides) && item.slides.length >= 2;
+  // 1 fundo por conteúdo, reaproveitado em todos os slides (custo menor
+  // e visual coerente ao arrastar o carrossel). null = sem OPENAI_API_KEY
+  // configurada ou a chamada falhou -- creativeSvg/carouselSvgs caem pro
+  // fundo liso original nesse caso.
+  const backgroundDataUri = await generateBackgroundImage(item);
   let creativeUrl;
   if (isCarrossel) {
-    const slides = carouselSvgs(item, index);
+    const slides = carouselSvgs(item, index, backgroundDataUri);
     for (const slide of slides) await fs.writeFile(path.join(outputDir, slide.file), slide.svg, "utf8");
     creativeUrl = `${repoRawBase}/${slides[0].file}`;
   } else {
-    const creative = creativeSvg(item, index);
+    const creative = creativeSvg(item, index, backgroundDataUri);
     await fs.writeFile(path.join(outputDir, creative.file), creative.svg, "utf8");
     creativeUrl = `${repoRawBase}/${creative.file}`;
   }
