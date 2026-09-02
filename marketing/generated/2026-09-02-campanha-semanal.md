@@ -1,103 +1,103 @@
 # Campanha semanal — 2026-09-02
 ## Objetivo comercial
-Gerar demanda qualificada e oportunidades comerciais (diagnósticos, demonstrações e conversas comerciais) para as linhas de Consultoria e Plataforma Conforma360, com foco em mineração, indústria e organizações multi-unidades.
+Gerar demanda qualificada e oportunidades comerciais (diagnósticos, demonstrações e conversas comerciais) para Consultoria e Plataforma Conforma360, priorizando mineração, indústria e empresas multi-unidade com operações complexas.
 ## Público prioritário
-Gestores e diretores de Meio Ambiente, SST e Compliance em empresas de mineração, indústria e operações complexas com múltiplas unidades no Brasil.
+Gestores e diretores de Meio Ambiente, SST e Compliance em empresas de mineração, indústria e operações multi-unidade no Brasil, responsáveis por conformidade legal, auditorias e gestão de riscos.
 ## Oferta principal
-Diagnóstico de conformidade e demonstração da plataforma de gestão integrada de Meio Ambiente, SST e Compliance.
+Diagnóstico técnico de conformidade (Consultoria) e demonstração guiada da Plataforma Conforma360 para gestão integrada de Meio Ambiente, SST e Compliance.
 ## Estratégia de aquisição
-Semana estruturada em jornada: dor/risco (segunda), educação técnica (terça), autoridade/prova (quarta), produto/demonstração (quinta) e conversão (sexta), distribuída entre LinkedIn, Instagram, blog e e-mail, conduzindo o público para diagnóstico, demonstração ou conversa comercial com a equipe Conforma360.
+Semana estruturada em jornada: (1) dor/risco para gerar atenção, (2) educação para construir confiança, (3) autoridade/prova social para reduzir objeções, (4) produto/demonstração para mostrar solução prática, (5) conversão direta com oferta clara de diagnóstico ou demonstração. Distribuição multicanal (LinkedIn, Instagram, e-mail, blog) com CTAs progressivos guiando para agendamento comercial.
 ## Calendário
 ### Dia 1 — Segunda-feira
 - Canal: linkedin
 - Formato: post
 - Linha comercial: ambos
-- Tema: Risco de não conformidade em operações multi-unidades
-- Dor ou oportunidade: Empresas com várias unidades perdem visibilidade sobre requisitos legais e prazos, aumentando o risco de autuações e paralisações.
-- Objetivo: Gerar reconhecimento do problema e engajamento inicial com decisores técnicos
-- Headline: Quantas unidades da sua operação você realmente controla em tempo real?
-- Legenda completa: Em operações com múltiplas unidades, a falta de visibilidade centralizada sobre requisitos legais de Meio Ambiente e SST é um dos principais fatores de risco. Cada unidade pode estar em um estágio diferente de conformidade, e sem controle consolidado, decisões importantes ficam baseadas em informação incompleta. A aplicabilidade de cada requisito legal deve sempre ser validada conforme o contexto específico da organização. Fale com a Conforma360 para entender como estruturar um diagnóstico da sua operação.
-- CTA: Solicite um diagnóstico inicial
-- Ideia de criativo: Imagem institucional com mapa estilizado de múltiplas unidades industriais conectadas por linhas de status (verde/amarelo/vermelho)
-- Métrica principal: Taxa de engajamento (curtidas, comentários, compartilhamentos) e cliques no link do diagnóstico
+- Tema: Risco de não conformidade em operações multi-unidade
+- Dor ou oportunidade: Empresas com múltiplas unidades enfrentam dificuldade em manter visibilidade centralizada sobre requisitos legais, prazos e evidências, aumentando o risco de autuações e paralisações.
+- Objetivo: Gerar atenção e engajamento sobre o risco de descontrole em operações complexas, posicionando a Conforma360 como especialista no tema.
+- Headline: Quantas unidades da sua empresa você realmente consegue monitorar hoje?
+- Legenda completa: Operações com múltiplas unidades multiplicam a complexidade da gestão de Meio Ambiente, SST e Compliance. Sem visibilidade centralizada, prazos legais, evidências e planos de ação podem passar despercebidos — e a exposição a autuações cresce silenciosamente. A aplicabilidade de cada requisito legal deve ser avaliada conforme a realidade de cada organização. Fale com nossos especialistas para entender onde estão os pontos cegos da sua operação.
+- CTA: Agende uma conversa com nosso time técnico
+- Ideia de criativo: Imagem institucional com mapa estilizado de unidades industriais conectadas por linhas tracejadas, tom sóbrio (azul-escuro e branco).
+- Métrica principal: Taxa de engajamento (curtidas, comentários, compartilhamentos) e cliques no link de agendamento
 - Prévia visual: https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-1.png
 ### Dia 2 — Terça-feira
 - Canal: blog
 - Formato: post
 - Linha comercial: consultoria
-- Tema: Diferenças entre ISO 14001 e ISO 45001 na prática
-- Dor ou oportunidade: Gestores confundem escopo e requisitos das normas, levando a auditorias mal preparadas e sistemas de gestão desalinhados.
-- Objetivo: Educar o público técnico e posicionar a Conforma360 como referência em normas de gestão
-- Headline: ISO 14001 e ISO 45001: o que muda na prática da sua gestão
-- Legenda completa: Embora compartilhem estrutura semelhante, ISO 14001 (Meio Ambiente) e ISO 45001 (Saúde e Segurança Ocupacional) têm focos distintos e exigem abordagens específicas de implementação. Neste artigo, explicamos as principais diferenças de escopo, riscos e evidências exigidas em cada norma — sem substituir a análise técnica necessária para o contexto específico de cada organização. A consultoria da Conforma360 apoia empresas na estruturação e manutenção desses sistemas de gestão.
+- Tema: Requisitos legais em Meio Ambiente e SST: como estruturar um processo contínuo
+- Dor ou oportunidade: Muitas empresas tratam o levantamento de requisitos legais como uma ação pontual, e não como processo contínuo, o que gera desatualização e risco de não conformidade.
+- Objetivo: Educar o público sobre a importância de um processo estruturado de gestão de requisitos legais, gerando tráfego qualificado para o blog.
+- Headline: Requisitos legais mudam. Sua gestão acompanha essa velocidade?
+- Legenda completa: A gestão de requisitos legais em Meio Ambiente e SST não pode ser tratada como projeto único — é um processo contínuo, que exige atualização, avaliação de aplicabilidade e evidências organizadas. Neste artigo, explicamos como estruturar esse processo de forma sistemática. Lembre-se: a aplicabilidade de cada norma deve sempre ser validada conforme o contexto específico da sua organização.
 - CTA: Leia o artigo completo no blog
-- Ideia de criativo: Infográfico comparativo simples entre as duas normas, com ícones representando meio ambiente e segurança
+- Ideia de criativo: Banner com ícone de documento e engrenagem, simbolizando processo contínuo, paleta corporativa.
 - Métrica principal: Número de acessos ao artigo e tempo médio de leitura
 - Prévia visual: https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-2.png
 ### Dia 3 — Quarta-feira
 - Canal: instagram
 - Formato: carrossel
 - Linha comercial: consultoria
-- Tema: Passo a passo de uma auditoria de conformidade bem preparada
-- Dor ou oportunidade: Empresas chegam despreparadas para auditorias externas por falta de organização documental e evidências centralizadas.
-- Objetivo: Demonstrar autoridade técnica e educar sobre boas práticas de preparação para auditoria
-- Headline: 5 passos para chegar preparado em uma auditoria de conformidade
-- Legenda completa: Auditorias de conformidade exigem mais do que documentos em dia — exigem organização, rastreabilidade e evidências acessíveis. Preparamos um passo a passo com práticas que ajudam a reduzir surpresas durante o processo. Lembre-se: cada auditoria tem particularidades conforme o setor, a legislação aplicável e o escopo certificado, por isso a orientação técnica especializada é sempre recomendada.
-- CTA: Fale com um especialista da Conforma360
-- Ideia de criativo: Carrossel com ilustrações minimalistas numeradas, uma para cada etapa do processo de auditoria
-- Métrica principal: Alcance do carrossel e taxa de conclusão (visualização até o último slide)
-- Prévia visual (carrossel, 7 slides): https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-1.png, https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-2.png, https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-3.png, https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-4.png, https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-5.png, https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-6.png, https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-7.png
+- Tema: Mitos e fatos sobre auditorias de conformidade em ISO 14001 e 45001
+- Dor ou oportunidade: Existe confusão comum sobre o que realmente é avaliado em auditorias de certificação, levando empresas a se prepararem de forma equivocada.
+- Objetivo: Aumentar autoridade técnica da Conforma360 desfazendo mitos comuns sobre auditorias, gerando engajamento e reconhecimento de expertise.
+- Headline: Auditoria de ISO não é sobre documentos bonitos. É sobre evidências reais.
+- Legenda completa: Muita gente ainda acredita em mitos sobre auditorias ISO 14001 e 45001. Separamos alguns dos mais comuns para ajudar sua equipe a se preparar com mais clareza e menos ansiedade. Cada organização deve avaliar suas próprias práticas conforme o escopo e contexto de certificação aplicável.
+- CTA: Salve este carrossel e compartilhe com seu time
+- Ideia de criativo: Carrossel com ícones de check e X para contrastar mito x fato, cores contrastantes (verde e vermelho suave).
+- Métrica principal: Salvamentos e compartilhamentos do carrossel
+- Prévia visual (carrossel, 6 slides): https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-1.png, https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-2.png, https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-3.png, https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-4.png, https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-5.png, https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-3-slide-6.png
 ### Dia 4 — Quinta-feira
 - Canal: linkedin
 - Formato: post
 - Linha comercial: plataforma
-- Tema: Gestão centralizada de requisitos legais e evidências
-- Dor ou oportunidade: Planilhas isoladas e controles manuais dificultam a consolidação de indicadores e o acompanhamento de planos de ação entre unidades.
-- Objetivo: Apresentar a plataforma como solução prática para consolidar gestão de conformidade
-- Headline: Requisitos legais, evidências e planos de ação em um único lugar
-- Legenda completa: A plataforma Conforma360 foi desenvolvida para apoiar equipes de Meio Ambiente, SST e Compliance na gestão integrada de requisitos legais, documentos, inspeções, auditorias, planos de ação e indicadores — com apoio de inteligência artificial para organizar e priorizar informações. Isso não substitui a validação jurídica de requisitos aplicáveis ao seu contexto, mas oferece estrutura para uma gestão mais consistente. Conheça como funciona na prática.
-- CTA: Agende uma demonstração da plataforma
-- Ideia de criativo: Mockup da interface da plataforma mostrando painel de indicadores e requisitos legais
-- Métrica principal: Número de agendamentos de demonstração gerados pelo post
+- Tema: Demonstração prática: como centralizar evidências e planos de ação em um único lugar
+- Dor ou oportunidade: Equipes de Meio Ambiente, SST e Compliance perdem tempo e controle ao gerenciar evidências, inspeções e planos de ação em planilhas dispersas e e-mails.
+- Objetivo: Apresentar a Plataforma Conforma360 como solução prática para centralização e rastreabilidade, incentivando agendamento de demonstração.
+- Headline: Planilhas espalhadas não mostram o que sua operação realmente está fazendo.
+- Legenda completa: Gerenciar evidências, inspeções e planos de ação em múltiplas planilhas e e-mails dificulta a rastreabilidade e aumenta o risco de perda de informações críticas. A Plataforma Conforma360 foi desenvolvida para centralizar esses processos, dando visibilidade única sobre Meio Ambiente, SST e Compliance da sua operação. Quer ver como isso funciona na prática?
+- CTA: Solicite uma demonstração da plataforma
+- Ideia de criativo: Print estilizado (mockup) da interface da plataforma mostrando painel de indicadores e planos de ação, sem dados reais de clientes.
+- Métrica principal: Número de solicitações de demonstração geradas
 - Prévia visual: https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-4.png
 ### Dia 5 — Sexta-feira
 - Canal: email
 - Formato: post
 - Linha comercial: ambos
-- Tema: Convite direto para diagnóstico ou demonstração
-- Dor ou oportunidade: Leads engajados ao longo da semana ainda não deram o próximo passo comercial por falta de um convite claro e direto.
-- Objetivo: Converter engajamento da semana em agendamentos de diagnóstico ou demonstração
-- Headline: Vamos avaliar o nível de conformidade da sua operação?
-- Legenda completa: Ao longo da semana, falamos sobre riscos de não conformidade, boas práticas de auditoria e como a gestão integrada pode reduzir a complexidade operacional. Se sua empresa atua em mineração, indústria ou possui múltiplas unidades, este é um bom momento para conversar. Podemos indicar, conforme seu cenário, se o caminho mais adequado é um diagnóstico de consultoria, uma demonstração da plataforma, ou ambos.
-- CTA: Agende uma conversa com nosso time comercial
-- Ideia de criativo: E-mail com layout limpo, botão de CTA em destaque e resumo visual dos temas da semana
-- Métrica principal: Taxa de abertura, taxa de cliques e número de agendamentos gerados
+- Tema: Convite direto para diagnóstico técnico ou demonstração da plataforma
+- Dor ou oportunidade: Empresas que reconhecem lacunas em conformidade muitas vezes não sabem por onde começar a agir de forma estruturada.
+- Objetivo: Converter leads engajados na semana em agendamentos concretos de diagnóstico ou demonstração comercial.
+- Headline: Sua operação está pronta para o próximo nível de conformidade?
+- Legenda completa: Ao longo da semana, discutimos riscos, requisitos legais, auditorias e gestão de evidências. Agora é o momento de transformar essas reflexões em ação. A Conforma360 oferece diagnóstico técnico especializado (Consultoria) e demonstração guiada da Plataforma para gestão integrada de Meio Ambiente, SST e Compliance. Vamos conversar sobre o cenário específico da sua organização?
+- CTA: Agende seu diagnóstico ou demonstração agora
+- Ideia de criativo: E-mail com layout limpo, botão de CTA destacado, resumo visual dos temas da semana em ícones.
+- Métrica principal: Taxa de abertura, taxa de cliques e número de agendamentos confirmados
 - Prévia visual: https://nezdrfoafuccuaaeozfc.supabase.co/storage/v1/object/public/marketing-creatives/generated/2026-09-02-criativo-5.png
 ## Ativos de conversão
-- Landing page de Diagnóstico de Conformidade (Consultoria) com formulário curto, explicação do processo e CTA para agendamento com time comercial
-- Landing page de Demonstração da Plataforma Conforma360 com vídeo institucional curto, principais módulos apresentados de forma geral e CTA de agendamento
+- Landing page de Diagnóstico Técnico de Conformidade com formulário de qualificação (setor, número de unidades, principais desafios) e agendamento direto de conversa comercial
+- Landing page de Demonstração da Plataforma Conforma360 com formulário de solicitação, apresentação dos módulos (requisitos legais, evidências, inspeções, auditorias, planos de ação, indicadores) e agendamento de demo guiada
 ## Sequência de follow-up
-- E-mail de follow-up 2 dias após o download/preenchimento do formulário, reforçando o valor do diagnóstico ou demonstração e oferecendo horários disponíveis
-- Mensagem de WhatsApp comercial para leads que interagiram com os conteúdos da semana mas não converteram, com tom consultivo e sem pressão excessiva
-- E-mail de nutrição 5 dias depois, com material complementar (artigo do blog sobre ISO 14001/45001) para leads que ainda não responderam ao primeiro contato
+- E-mail de follow-up 48h após clique na landing page sem conversão, reforçando o valor do diagnóstico técnico e oferecendo horário alternativo de conversa
+- Mensagem de WhatsApp para leads que solicitaram demonstração mas não confirmaram horário, com opção de agendamento simplificado em até 3 cliques
+- E-mail de nutrição 5 dias após primeiro contato para leads que abriram mas não clicaram, compartilhando conteúdo complementar do blog sobre gestão de requisitos legais
 ## Hipóteses de teste
-- Testar duas versões de headline no post de segunda-feira (foco em risco vs. foco em pergunta direta) para avaliar qual gera mais engajamento
-- Testar CTA 'Solicite um diagnóstico inicial' vs. 'Fale com um especialista' no e-mail de sexta-feira para medir taxa de cliques
-- Testar formato carrossel vs. post único no conteúdo de quinta-feira sobre a plataforma, em públicos semelhantes, para avaliar taxa de agendamento de demonstração
+- Testar headline com foco em risco ('Quantas unidades você monitora hoje?') versus headline com foco em benefício ('Centralize sua conformidade em um único lugar') no anúncio de segunda-feira
+- Testar CTA direto ('Agende uma demonstração') versus CTA de baixo compromisso ('Saiba como funciona') no post de quinta-feira sobre a plataforma
+- Testar horário de envio do e-mail de conversão de sexta-feira (manhã 9h vs. tarde 15h) para avaliar impacto na taxa de abertura e cliques
 ## Próximas ações comerciais
-- Validar juridicamente todas as referências a normas (ISO 14001, ISO 45001) e requisitos legais antes da publicação
-- Revisar e aprovar as duas landing pages de conversão com o time comercial e de produto
-- Configurar o fluxo de automação de e-mail para os três follow-ups planejados
-- Alinhar com o time de vendas os critérios de qualificação de leads antes do agendamento de diagnósticos e demonstrações
-- Agendar reunião de revisão de métricas da semana anterior para calibrar a campanha da próxima semana
+- Validar internamente todos os textos com a equipe jurídica e técnica antes da publicação, garantindo que nenhuma afirmação sobre conformidade ou legislação seja apresentada como garantia
+- Criar as duas landing pages de conversão (diagnóstico e demonstração) com formulários de qualificação integrados ao CRM comercial
+- Preparar mockups visuais da plataforma para os criativos de quinta-feira, assegurando que nenhum dado real de cliente seja utilizado
+- Agendar aprovação dos 5 conteúdos e do e-mail de conversão com o responsável de marketing e liderança comercial até quarta-feira da semana anterior à publicação
+- Configurar disparo automatizado dos e-mails de follow-up e integração com WhatsApp Business para os leads gerados ao longo da semana
 ## Critérios de aprovação
-- Nenhuma peça deve prometer conformidade garantida, ausência de multas ou resultados financeiros específicos
-- Todo conteúdo sobre legislação deve indicar que a aplicabilidade depende do contexto da organização e não substitui aconselhamento jurídico individual
-- Consultoria e Plataforma devem estar claramente distinguidas em todas as peças que mencionam ambas
-- Nenhum conteúdo pode citar clientes, cases, números de resultados ou funcionalidades não confirmadas pela empresa
-- Headline_destaque deve ser cópia literal de trecho existente no headline correspondente
-- Todas as peças precisam ter CTA claro e alinhado ao estágio da jornada (reconhecimento, educação, prova, produto ou conversão)
-- Nenhuma publicação deve ser feita automaticamente nas redes sociais nesta etapa; todo o conteúdo aguarda aprovação humana
+- Nenhum conteúdo deve prometer conformidade garantida, ausência de multas ou resultados financeiros específicos
+- Toda menção a legislação deve indicar claramente que a aplicabilidade depende do contexto da organização e deve ser validada individualmente
+- Nenhum case, cliente, número ou depoimento fictício deve ser mencionado em qualquer peça
+- Consultoria e Plataforma devem estar claramente diferenciadas em todo o material, sem gerar confusão sobre o que está sendo oferecido
+- Todos os CTAs devem direcionar para ativos de conversão reais e funcionais (landing pages ou formulários já validados)
+- O tom deve permanecer técnico, premium e comercialmente responsável, evitando linguagem alarmista ou promessas vazias
+- Toda peça deve ser revisada e aprovada por marketing e jurídico antes da publicação; nenhuma postagem deve ser automática
 
 ---
 Gerado automaticamente pelo CONFORMA360 Marketing AI.
