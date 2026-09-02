@@ -36,7 +36,12 @@ function withOfficialLogo(svg, logoDataUri) {
     .replace(/<image[^>]*(?:data-conforma360-logo="true"|href="[^"]*Logo(?:%20| )Conforma360\.jpg")[^>]*\/>/gi, "")
     .replace(/<image[^>]*href="https?:\/\/nezdrfoafuccuaaeozfc\.supabase\.co\/storage\/v1\/object\/public\/marketing-creatives\/Logo[^>]*\/>/gi, "");
   const logo = `<image data-conforma360-logo="true" href="${logoDataUri}" x="70" y="45" width="360" height="135" preserveAspectRatio="xMinYMid meet"/>`;
-  return cleanSvg.replace(/(<svg[^>]*>)/, `$1${logo}`);
+  // Insere ANTES de </svg> (último elemento = topo da pilha de
+  // renderização), não logo depois de <svg>. Era esse o motivo real da
+  // logo nunca aparecer: como primeiro elemento, tudo que vem depois no
+  // cartão (o fundo -- cor lisa ou, agora, a foto de IA) desenhava por
+  // cima dela.
+  return cleanSvg.replace(/<\/svg>\s*$/, `${logo}</svg>`);
 }
 
 async function uploadObject(fileName, body, contentType) {
