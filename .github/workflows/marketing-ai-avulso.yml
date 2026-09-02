@@ -1,0 +1,34 @@
+name: CONFORMA360 Marketing AI — Conteúdo Avulso
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  gerar-avulso:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate ad-hoc content
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+          MARKETING_SUPABASE_URL: ${{ secrets.MARKETING_SUPABASE_URL }}
+          MARKETING_SUPABASE_KEY: ${{ secrets.MARKETING_SUPABASE_KEY }}
+        run: node scripts/marketing-ai-avulso.mjs
+
+      - name: Commit generated summary
+        run: |
+          git config user.name "conforma360-marketing-ai[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add marketing/generated/
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração local para commitar."
+            exit 0
+          fi
+          git commit -m "chore(marketing): gera conteudo avulso"
+          git push
