@@ -83,6 +83,17 @@ export const Route = createFileRoute("/api/admin/manage")({
           return new Response(JSON.stringify(await supabase(body.table, { method: "PATCH", body: JSON.stringify(payload) }, `id=eq.${encodeURIComponent(body.id)}`)), { headers: { "Content-Type": "application/json" } });
         } catch (error) { return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Erro interno." }), { status: 500 }); }
       },
+      DELETE: async ({ request }) => {
+        if (!(await authorized(request))) return new Response(JSON.stringify({ error: "Não autorizado." }), { status: 401 });
+        const url = new URL(request.url);
+        const table = url.searchParams.get("table") || "";
+        const id = url.searchParams.get("id");
+        if (!TABLES.has(table) || !id) return new Response(JSON.stringify({ error: "Tabela ou id inválidos." }), { status: 400 });
+        try {
+          await supabase(table, { method: "DELETE", headers: { Prefer: "return=minimal" } }, `id=eq.${encodeURIComponent(id)}`);
+          return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
+        } catch (error) { return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Erro interno." }), { status: 500 }); }
+      },
     },
   },
 });
