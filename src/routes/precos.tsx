@@ -15,7 +15,7 @@ import { WHATSAPP_URL } from "@/components/site/contact";
 const SITE_URL = "https://www.conforma360.com.br/precos";
 const title = "Preços | Conforma360";
 const description =
-  "Planos do Conforma360: Starter, Profissional e Enterprise, ou monte seu próprio pacote. Teste grátis por 14 dias, sem cartão.";
+  "Planos do Conforma360: Essencial, Profissional e Enterprise. Teste grátis por 14 dias, sem cartão, com acesso completo.";
 
 export const Route = createFileRoute("/precos")({
   head: () => ({
@@ -36,32 +36,29 @@ const TRIAL_URL = "https://app.conforma360.com.br/auth?mode=signup";
 
 const planos = [
   {
-    nome: "Starter",
-    preco: "490",
+    nome: "Essencial",
+    preco: "297",
     destaque: false,
-    itens: [
-      "Inspeções, NC e Planos de Ação",
-      "Gestão de Perigos e Riscos",
-      "Diálogo Diário de Segurança",
-    ],
+    itens: ["Inspeções & SST", "Gestão de EPI"],
   },
   {
     nome: "Profissional",
-    preco: "1.490",
+    preco: "597",
     destaque: true,
     selo: "Mais escolhido",
     itens: [
-      "Tudo do Starter",
-      "Gestão de EPI",
-      "Certificados de Treinamento",
+      "Tudo do Essencial",
+      "Conforma360 RAC",
+      "Ambiental & ESG",
       "PSI — Risco Psicossocial (NR-1)",
+      "Conforma IA",
     ],
   },
   {
     nome: "Enterprise",
-    preco: "3.990",
+    preco: "997",
     destaque: false,
-    itens: ["Tudo do Profissional", "Ambiental & ESG", "Analytics SST", "Saúde Ocupacional"],
+    itens: ["Tudo do Profissional", "Saúde Ocupacional", "Certificados de Treinamento"],
   },
 ];
 
@@ -74,7 +71,7 @@ const faq = [
   {
     pergunta: "Posso trocar de plano depois?",
     resposta:
-      "Sim. Você pode fazer upgrade a qualquer momento, e também escolher o modelo self-service, pagando só pelos módulos que sua empresa realmente usa.",
+      "Sim. Você pode fazer upgrade a qualquer momento, e também montar com a gente um pacote sob medida, pagando só pelos módulos que sua empresa realmente usa.",
   },
   {
     pergunta: "Tem contrato de fidelidade?",
@@ -83,7 +80,7 @@ const faq = [
   {
     pergunta: "O que é o Conforma360 RAC?",
     resposta:
-      "É o módulo dedicado a empresas prestadoras de serviço à Vale, com gestão de aderência aos Requisitos de Atividades Críticas (RAC), matriz de capacitação e inspeções por contrato. É contratado separadamente — fale com a gente para o valor.",
+      "É o módulo dedicado a empresas prestadoras de serviço à Vale, com gestão de aderência aos Requisitos de Atividades Críticas (RAC), matriz de capacitação e inspeções por contrato. Já vem incluso a partir do plano Profissional.",
   },
   {
     pergunta: "Vocês oferecem consultoria além do software?",
@@ -104,8 +101,8 @@ function PrecosPage() {
               Um plano para cada estágio da sua operação
             </h1>
             <p className="mt-5 text-lg text-muted-foreground">
-              Comece com um plano pronto ou monte seu próprio pacote, pagando só pelos módulos que
-              você precisa. Sem fidelidade, cancele quando quiser.
+              Teste grátis por 14 dias com acesso completo à plataforma. Depois, escolha o plano
+              ideal pro tamanho da sua operação. Sem fidelidade, cancele quando quiser.
             </p>
           </div>
 
@@ -153,10 +150,11 @@ function PrecosPage() {
 
           <div className="mx-auto mt-8 max-w-6xl rounded-2xl border border-border bg-accent p-6 text-center sm:p-8">
             <p className="text-sm text-accent-foreground">
-              <strong>Prefere montar sob medida?</strong> No plano self-service, você escolhe só os
-              módulos que precisa agora — o preço é a soma direta, sem pacote fixo. Todos os planos
-              incluem <strong>DDS</strong> e <strong>Copiloto Executivo (IA)</strong> sem custo
-              adicional.
+              <strong>Precisa de uma combinação diferente de módulos?</strong> Fale com a gente e
+              montamos um pacote sob medida pra sua empresa. Todos os planos já incluem{" "}
+              <strong>Não Conformidades</strong>, <strong>Planos de Ação</strong>,{" "}
+              <strong>DDS</strong>, <strong>Copiloto Executivo</strong> e{" "}
+              <strong>Requisitos Legais</strong> (ConformaLegal), sem custo adicional.
             </p>
           </div>
 
@@ -166,8 +164,8 @@ function PrecosPage() {
               <p className="mt-2 text-sm text-muted-foreground">
                 <strong className="text-graphite">Conforma360 RAC</strong> — módulo dedicado à
                 gestão de aderência aos Requisitos de Atividades Críticas, com matriz de
-                capacitação, inspeções e evidências por contrato. Módulo avulso, consulte o
-                investimento.
+                capacitação, inspeções e evidências por contrato. Já incluso a partir do plano
+                Profissional.
               </p>
               <DemoDialog>
                 <Button variant="outline" className="mt-4">
