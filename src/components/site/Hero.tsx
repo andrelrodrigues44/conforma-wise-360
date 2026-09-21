@@ -21,7 +21,7 @@ export function Hero() {
           <div className="reveal min-w-0">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-accent px-3.5 py-1.5 text-xs font-semibold text-primary">
               <CheckCircle2 className="h-3.5 w-3.5" />
-              Meio Ambiente · SST · Compliance · ESG · Operações
+              Consultoria + Plataforma · Meio Ambiente · SST · Compliance · ESG
             </span>
 
             <h1 className="mt-6 text-4xl font-extrabold leading-[1.08] text-graphite sm:text-5xl xl:text-[3.5rem]">
@@ -31,8 +31,8 @@ export function Hero() {
             </h1>
 
             <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-              A plataforma integrada para Meio Ambiente, Segurança do Trabalho, Compliance Legal,
-              ESG e Operações da sua empresa.
+              Consultoria especializada e plataforma integrada para Meio Ambiente, Segurança do
+              Trabalho, Compliance Legal, ESG e Operações da sua empresa.
             </p>
             <p className="mt-3 max-w-xl text-base text-muted-foreground">
               Centralize informações, reduza riscos, automatize processos e tome decisões baseadas
@@ -58,6 +58,16 @@ export function Hero() {
                 </a>
               </Button>
             </div>
+
+            <p className="mt-5 text-sm text-muted-foreground">
+              Precisa de apoio técnico para implantar ou regularizar?{" "}
+              <a
+                href="/#consultoria"
+                className="whitespace-nowrap font-semibold text-primary hover:underline"
+              >
+                Conheça a consultoria →
+              </a>
+            </p>
 
             <ul className="mt-9 grid gap-3 sm:grid-cols-3">
               {bullets.map((b) => (

@@ -1,5 +1,6 @@
 import { ArrowRight, BriefcaseBusiness, CheckCircle2, MonitorSmartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DemoDialog } from "./DemoDialog";
 
 const consultoria = [
   "Meio Ambiente e licenciamento",
@@ -17,7 +18,10 @@ const plataforma = [
 
 export function ConsultoriaPlataforma() {
   return (
-    <section className="border-y border-border bg-surface px-5 py-20 lg:px-8 lg:py-24" id="solucoes">
+    <section
+      className="border-y border-border bg-surface px-5 py-20 lg:px-8 lg:py-24"
+      id="consultoria"
+    >
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
           <span className="text-xs font-bold tracking-[0.2em] text-primary">CONFORMA360</span>
@@ -38,7 +42,9 @@ export function ConsultoriaPlataforma() {
                   <BriefcaseBusiness className="h-6 w-6" />
                 </div>
                 <p className="mt-6 text-xs font-bold tracking-[0.18em] text-primary">LINHA 01</p>
-                <h3 className="mt-2 text-2xl font-extrabold text-graphite">Consultoria Conforma360</h3>
+                <h3 className="mt-2 text-2xl font-extrabold text-graphite">
+                  Consultoria Conforma360
+                </h3>
               </div>
             </div>
             <p className="mt-4 text-muted-foreground">
@@ -53,11 +59,11 @@ export function ConsultoriaPlataforma() {
                 </li>
               ))}
             </ul>
-            <Button asChild variant="outline" size="lg" className="mt-8">
-              <a href="/#contato">
+            <DemoDialog linha="consultoria">
+              <Button variant="outline" size="lg" className="mt-8">
                 Solicitar consultoria <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
+              </Button>
+            </DemoDialog>
           </article>
 
           <article className="rounded-3xl border border-primary/30 bg-primary/[0.04] p-7 shadow-soft lg:p-9">
@@ -78,7 +84,7 @@ export function ConsultoriaPlataforma() {
                 </li>
               ))}
             </ul>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Button asChild size="lg">
                 <a href="/precos">
                   Conhecer a plataforma <ArrowRight className="ml-2 h-4 w-4" />

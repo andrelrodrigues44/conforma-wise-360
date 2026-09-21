@@ -6,6 +6,9 @@ export interface LeadDemoInput {
   telefone: string;
   mensagem?: string | undefined;
   website?: string | undefined; // honeypot -- sempre vazio num envio humano
+  // Qual serviço o visitante procura; o endpoint já grava e usa na pontuação do lead.
+  linha_comercial?: "consultoria" | "plataforma" | "ambos" | undefined;
+  interesse?: string | undefined;
 }
 
 export async function enviarLeadDemo(data: LeadDemoInput): Promise<void> {
@@ -18,4 +21,3 @@ export async function enviarLeadDemo(data: LeadDemoInput): Promise<void> {
     throw new Error("Não foi possível enviar sua solicitação. Tente novamente em instantes.");
   }
 }
-

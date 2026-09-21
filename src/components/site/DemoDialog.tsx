@@ -25,7 +25,33 @@ const schema = z.object({
   website: z.string().max(0).optional(),
 });
 
-export function DemoDialog({ children }: { children: ReactNode }) {
+type Linha = "consultoria" | "plataforma";
+
+// O que muda no formulário conforme o serviço que o visitante escolheu. A linha e o interesse
+// seguem no envio, pra você ver no cadastro de leads (e no e-mail de aviso) o que cada um pediu.
+const TEXTOS: Record<Linha, { titulo: string; descricao: string; interesse: string }> = {
+  plataforma: {
+    titulo: "Solicitar demonstração",
+    descricao:
+      "Apresentação guiada de 30 minutos com um especialista, focada na realidade da sua operação.",
+    interesse: "Demonstração da plataforma",
+  },
+  consultoria: {
+    titulo: "Solicitar consultoria",
+    descricao:
+      "Conversa inicial com um especialista para entender o seu cenário (licenciamento, SST, auditorias) e indicar o melhor caminho.",
+    interesse: "Consultoria",
+  },
+};
+
+export function DemoDialog({
+  children,
+  linha = "plataforma",
+}: {
+  children: ReactNode;
+  linha?: Linha;
+}) {
+  const textos = TEXTOS[linha];
   const [open, setOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [enviando, setEnviando] = useState(false);
@@ -43,7 +69,11 @@ export function DemoDialog({ children }: { children: ReactNode }) {
     setErrors({});
     setEnviando(true);
     try {
-      await enviarLeadDemo(result.data);
+      await enviarLeadDemo({
+        ...result.data,
+        linha_comercial: linha,
+        interesse: textos.interesse,
+      });
       setOpen(false);
       toast.success("Solicitação enviada!", {
         description: "Nossa equipe entrará em contato em até 1 dia útil.",
@@ -62,11 +92,8 @@ export function DemoDialog({ children }: { children: ReactNode }) {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Solicitar demonstração</DialogTitle>
-          <DialogDescription>
-            Apresentação guiada de 30 minutos com um especialista, focada na realidade da sua
-            operação.
-          </DialogDescription>
+          <DialogTitle className="text-2xl">{textos.titulo}</DialogTitle>
+          <DialogDescription>{textos.descricao}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 pt-2">
           <input

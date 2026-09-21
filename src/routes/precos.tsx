@@ -181,7 +181,7 @@ function PrecosPage() {
                 <strong className="text-graphite">a partir de R$ 1.200,00</strong>, conforme o
                 escopo.
               </p>
-              <DemoDialog>
+              <DemoDialog linha="consultoria">
                 <Button variant="outline" className="mt-4">
                   Falar sobre consultoria
                 </Button>
