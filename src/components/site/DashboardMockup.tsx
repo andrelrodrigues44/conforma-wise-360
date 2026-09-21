@@ -1,84 +1,168 @@
-import painel from "@/assets/painel-conforma360.png.asset.json";
+// Prévia ilustrativa do painel do Conforma360, feita em HTML (não é print): fica nítida em
+// qualquer tela e não carrega dado real de ninguém. Os números são de exemplo.
 
-const KEY_ROWS = [14, 14, 13, 12, 11];
+const NAV = ["Painel", "Alertas", "Assistente IA", "Inspeções", "Gestão de EPI", "Saúde"];
 
-function KeyboardDeck() {
-  return (
-    <div className="kb-deck relative mx-auto w-[106%] origin-top -translate-x-[3%] rounded-b-[0.9rem] border border-white/10 bg-gradient-to-b from-[#242424] via-[#1b1b1b] to-[#101010] px-4 pb-5 pt-4 shadow-elevated sm:px-6 sm:pb-8 sm:pt-6">
-      {/* Teclas */}
-      <div className="space-y-1 sm:space-y-1.5">
-        {KEY_ROWS.map((count, row) => (
-          <div
-            key={row}
-            className="grid gap-[2px] sm:gap-[3px]"
-            style={{ gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))` }}
-          >
-            {Array.from({ length: count }).map((_, key) => (
-              <span
-                key={key}
-                className="h-[5px] rounded-[2px] bg-white/[0.07] ring-1 ring-white/[0.06] sm:h-[9px] sm:rounded-[3px]"
-              />
-            ))}
-          </div>
-        ))}
-        {/* Barra de espaço */}
-        <div className="grid grid-cols-12 gap-[2px] sm:gap-[3px]">
-          <span className="col-span-2 h-[5px] rounded-[2px] bg-white/[0.07] ring-1 ring-white/[0.06] sm:h-[9px]" />
-          <span className="col-span-8 h-[5px] rounded-[2px] bg-white/[0.07] ring-1 ring-white/[0.06] sm:h-[9px]" />
-          <span className="col-span-2 h-[5px] rounded-[2px] bg-white/[0.07] ring-1 ring-white/[0.06] sm:h-[9px]" />
-        </div>
-      </div>
+const RESUMO = [
+  { cor: "bg-muted-foreground/40", texto: "0 documento(s) vencido(s)" },
+  { cor: "bg-warning", texto: "3 inspeção(ões) pendente(s)" },
+  { cor: "bg-primary", texto: "Nenhuma licença vencida" },
+];
 
-      {/* Trackpad */}
-      <div className="mx-auto mt-2.5 h-4 w-[34%] rounded-[0.35rem] bg-white/[0.05] ring-1 ring-white/[0.08] sm:mt-4 sm:h-6" />
+const CHIPS = [
+  { rotulo: "Licenças", valor: "Em dia" },
+  { rotulo: "Inspeções", valor: "1 atrasada" },
+  { rotulo: "Treinamentos", valor: "Em dia" },
+  { rotulo: "Documentos", valor: "Em dia" },
+];
 
-      {/* Borda frontal da base */}
-      <span className="absolute inset-x-0 bottom-0 h-[3px] rounded-b-[0.9rem] bg-gradient-to-b from-white/10 to-transparent sm:h-1" />
-    </div>
-  );
-}
+const BARRAS = [46, 52, 58, 63, 71, 78, 84, 91];
+
+const RAIO = 30;
+const CIRCUNFERENCIA = 2 * Math.PI * RAIO;
 
 export function DashboardMockup() {
   return (
-    <div className="notebook-3d relative">
-      {/* Elementos gráficos discretos */}
+    <div className="relative">
       <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-tr from-accent/60 via-transparent to-primary/10 blur-2xl" />
 
-      <div className="notebook-3d-inner group/nb hover:notebook-3d-inner-hover">
-        {/* Tampa / tela do notebook */}
-        <div className="relative z-10 rounded-t-[1.1rem] border border-graphite/25 bg-gradient-to-b from-graphite to-[#1b1b1b] p-[0.55rem] shadow-elevated sm:rounded-t-[1.4rem] sm:p-3">
-          <div className="relative overflow-hidden rounded-[0.6rem] bg-graphite ring-1 ring-white/10 sm:rounded-[0.8rem]">
-            {/* Barra do sistema */}
-            <div className="flex items-center gap-1.5 bg-[#101010] px-3 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-destructive/70 sm:h-2 sm:w-2" />
-              <span className="h-1.5 w-1.5 rounded-full bg-warning/70 sm:h-2 sm:w-2" />
-              <span className="h-1.5 w-1.5 rounded-full bg-primary/70 sm:h-2 sm:w-2" />
-              <div className="ml-2 flex-1 truncate rounded bg-white/10 px-2 py-0.5 text-[0.55rem] text-white/60 sm:text-[0.6rem]">
-                app.conforma360.com.br/painel
-              </div>
-            </div>
-
-            <img
-              src={painel.url}
-              alt="Centro de Operações SSMA do Conforma360: índice de conformidade 98%, resumo do dia, licenças, inspeções, treinamentos e documentos"
-              className="block w-full"
-              loading="eager"
-              decoding="async"
-            />
-
-            {/* Brilho sutil da tela */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/0 to-white/10" />
+      <figure
+        role="img"
+        aria-label="Prévia ilustrativa do painel do Conforma360, com índice de conformidade, resumo do dia e status de licenças, inspeções, treinamentos e documentos"
+        className="overflow-hidden rounded-xl border border-border bg-card shadow-elevated"
+      >
+        {/* Barra do navegador */}
+        <div className="flex items-center gap-1.5 border-b border-border bg-surface px-3 py-2">
+          <span className="h-2 w-2 rounded-full bg-destructive/60" />
+          <span className="h-2 w-2 rounded-full bg-warning/70" />
+          <span className="h-2 w-2 rounded-full bg-primary/60" />
+          <div className="ml-2 flex-1 truncate rounded-md bg-card px-2.5 py-0.5 text-[0.62rem] text-muted-foreground ring-1 ring-border">
+            app.conforma360.com.br/painel
           </div>
         </div>
 
-        {/* Dobradiça + base com teclado em perspectiva */}
-        <div className="kb-wrap">
-          <KeyboardDeck />
-        </div>
+        <div
+          aria-hidden="true"
+          className="grid grid-cols-[6.75rem_minmax(0,1fr)] sm:grid-cols-[8rem_minmax(0,1fr)]"
+        >
+          {/* Menu lateral */}
+          <aside className="space-y-1 bg-graphite px-2.5 py-3.5 sm:px-3">
+            <p className="mb-3 px-1 text-[0.62rem] font-extrabold tracking-[0.14em] text-white">
+              CONFORMA<span className="text-primary-light">360</span>
+            </p>
+            {NAV.map((item, i) => (
+              <p
+                key={item}
+                className={`truncate rounded-md px-2 py-1.5 text-[0.6rem] font-medium sm:text-[0.64rem] ${
+                  i === 0 ? "bg-primary text-white" : "text-white/65"
+                }`}
+              >
+                {item}
+              </p>
+            ))}
+          </aside>
 
-        {/* Sombra projetada */}
-        <div className="mx-auto -mt-2 h-3 w-[80%] rounded-b-full bg-graphite/25 blur-[8px] sm:h-4" />
-      </div>
+          {/* Conteúdo */}
+          <div className="min-w-0 space-y-2.5 bg-surface p-3 sm:p-4">
+            <div>
+              <p className="text-[0.8rem] font-extrabold text-graphite sm:text-sm">
+                Centro de Operações SSMA
+              </p>
+              <p className="text-[0.6rem] text-muted-foreground">Visão geral da conformidade</p>
+            </div>
+
+            <div className="grid gap-2.5 sm:grid-cols-[1.05fr_1fr]">
+              {/* Índice de conformidade */}
+              <div className="rounded-xl bg-gradient-to-br from-primary-dark to-primary p-3 text-white">
+                <p className="text-[0.55rem] font-bold tracking-[0.14em] text-white/80">
+                  ÍNDICE DE CONFORMIDADE
+                </p>
+                <div className="mt-2 flex items-center gap-3">
+                  <svg
+                    viewBox="0 0 80 80"
+                    className="h-14 w-14 shrink-0 -rotate-90 sm:h-16 sm:w-16"
+                  >
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r={RAIO}
+                      fill="none"
+                      stroke="rgba(255,255,255,0.22)"
+                      strokeWidth="9"
+                    />
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r={RAIO}
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="9"
+                      strokeLinecap="round"
+                      strokeDasharray={`${CIRCUNFERENCIA * 0.98} ${CIRCUNFERENCIA}`}
+                    />
+                  </svg>
+                  <div>
+                    <p className="font-display text-2xl font-extrabold leading-none sm:text-[1.7rem]">
+                      98%
+                    </p>
+                    <span className="mt-1.5 inline-block rounded-full bg-white/20 px-2 py-0.5 text-[0.55rem] font-semibold">
+                      Excelente
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Resumo do dia */}
+              <div className="rounded-xl border border-border bg-card p-3">
+                <p className="text-[0.66rem] font-bold text-graphite">Resumo do dia</p>
+                <ul className="mt-2 space-y-1.5">
+                  {RESUMO.map((r) => (
+                    <li
+                      key={r.texto}
+                      className="flex items-center gap-2 text-[0.6rem] text-muted-foreground"
+                    >
+                      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${r.cor}`} />
+                      {r.texto}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-[0.58rem] font-semibold text-primary">
+                  Ver plano de ação →
+                </p>
+              </div>
+            </div>
+
+            {/* Situação por área */}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {CHIPS.map((c) => (
+                <div
+                  key={c.rotulo}
+                  className="rounded-lg border border-border bg-card px-2.5 py-1.5"
+                >
+                  <p className="text-[0.54rem] text-muted-foreground">{c.rotulo}</p>
+                  <p className="text-[0.66rem] font-bold text-graphite">{c.valor}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Evolução da conformidade (o celular fica sobre o canto direito desta faixa) */}
+            <div className="rounded-lg border border-border bg-card px-3 pb-2.5 pt-2">
+              <p className="text-[0.58rem] font-semibold text-muted-foreground">
+                Evolução da conformidade
+              </p>
+              <div className="mt-2 flex h-11 items-end gap-1.5 sm:h-14">
+                {BARRAS.map((h, i) => (
+                  <span
+                    key={i}
+                    style={{ height: `${h}%` }}
+                    className={`flex-1 rounded-t ${i === BARRAS.length - 1 ? "bg-primary" : "bg-primary/35"}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </figure>
     </div>
   );
 }

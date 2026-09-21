@@ -47,12 +47,6 @@ export function Header() {
               {l.label}
             </a>
           ))}
-          <a
-            href="/marketing-ai"
-            className="ml-2 rounded-md px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
-          >
-            Marketing AI
-          </a>
           <DemoDialog>
             <Button className="ml-2 shadow-soft">Solicitar Demonstração</Button>
           </DemoDialog>
@@ -81,13 +75,6 @@ export function Header() {
                 {l.label}
               </a>
             ))}
-            <a
-              href="/marketing-ai"
-              onClick={() => setOpen(false)}
-              className="rounded-md px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10"
-            >
-              Marketing AI
-            </a>
           </nav>
           <DemoDialog>
             <Button className="mt-3 w-full">Solicitar Demonstração</Button>

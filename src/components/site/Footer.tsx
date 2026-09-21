@@ -40,7 +40,7 @@ export function Footer() {
             <h3 className="text-sm font-bold text-graphite">Contato</h3>
             <ul className="mt-4 grid gap-3 text-sm text-muted-foreground">
               <li>
-                <a href="tel:+5531992293261" className="flex items-center gap-2 hover:text-primary">
+                <a href="tel:+5531984180879" className="flex items-center gap-2 hover:text-primary">
                   <Phone className="h-4 w-4 text-primary" />
                   {PHONE_DISPLAY}
                 </a>

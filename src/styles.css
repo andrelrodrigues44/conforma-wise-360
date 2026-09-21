@@ -77,7 +77,6 @@
   --shadow-elevated: var(--shadow-elevated);
 }
 
-
 :root {
   --radius: 0.875rem;
 
@@ -122,7 +121,6 @@
   --legal-soft: oklch(0.958 0.016 215);
   --mgmt: oklch(0.48 0.13 295);
   --mgmt-soft: oklch(0.962 0.02 295);
-
 
   --border: oklch(0.916 0.006 250);
   --input: oklch(0.916 0.006 250);
@@ -262,25 +260,3 @@
   }
 }
 
-@utility notebook-3d {
-  perspective: 1800px;
-}
-
-@utility notebook-3d-inner {
-  transform: rotateY(-18deg) rotateX(6deg) rotateZ(0.8deg);
-  transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@utility notebook-3d-inner-hover {
-  transform: rotateY(-9deg) rotateX(3deg);
-}
-
-.kb-wrap {
-  perspective: 900px;
-}
-
-.kb-deck {
-  transform: rotateX(45deg);
-  transform-style: preserve-3d;
-}

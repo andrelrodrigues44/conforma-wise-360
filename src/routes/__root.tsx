@@ -113,7 +113,7 @@ const organizationJsonLd = {
   logo: "https://www.conforma360.com.br/favicon.png",
   description: "Plataforma integrada de Meio Ambiente, SST, Compliance Legal, ESG e Operações.",
   email: "contato@conforma360.com.br",
-  telephone: "+5531992293261",
+  telephone: "+5531984180879",
   address: { "@type": "PostalAddress", addressCountry: "BR" },
 };
 
