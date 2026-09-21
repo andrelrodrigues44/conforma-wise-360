@@ -1,12 +1,5 @@
-import {
-  ClipboardCheck,
-  Camera,
-  FolderOpen,
-  BellRing,
-  ScrollText,
-  BarChart3,
-} from "lucide-react";
-import { PhoneMockup } from "./PhoneMockup";
+import { ClipboardCheck, Camera, FolderOpen, BellRing, ScrollText, BarChart3 } from "lucide-react";
+import appMobileMao from "@/assets/app-mobile-mao.webp";
 
 const features = [
   {
@@ -73,7 +66,16 @@ export function MobileSection() {
         <div className="flex justify-center lg:order-last">
           <div className="relative">
             <div className="pointer-events-none absolute -inset-8 -z-10 rounded-full bg-accent/70 blur-3xl" />
-            <PhoneMockup />
+            <img
+              src={appMobileMao}
+              alt="Conforma360 na palma da mão: aplicativo mobile com o menu do painel aberto, com acesso a alertas, assistente de IA, cadastros e conta"
+              width={1024}
+              height={1536}
+              loading="lazy"
+              decoding="async"
+              className="block h-auto w-[19rem] max-w-full rounded-3xl shadow-elevated sm:w-[22rem] lg:w-[24rem]"
+            />
+            <p className="mt-3 text-center text-xs text-muted-foreground">Imagem ilustrativa.</p>
           </div>
         </div>
       </div>

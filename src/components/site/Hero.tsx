@@ -2,7 +2,6 @@ import { ArrowRight, MessageCircle, ShieldCheck, Zap, LineChart, CheckCircle2 } 
 import { Button } from "@/components/ui/button";
 import { DemoDialog } from "./DemoDialog";
 import { DashboardMockup } from "./DashboardMockup";
-import { PhoneMockup } from "./PhoneMockup";
 import { WHATSAPP_URL } from "./contact";
 
 const bullets = [
@@ -74,7 +73,6 @@ export function Hero() {
 
           <div className="reveal relative min-w-0 [animation-delay:150ms]">
             <DashboardMockup />
-            <PhoneMockup className="absolute -bottom-14 -right-3 z-10 hidden origin-bottom-right scale-[0.5] transition-transform duration-300 hover:-translate-y-1 sm:block lg:-right-5 lg:scale-[0.56]" />
             <p className="mt-4 text-xs text-muted-foreground">
               Prévia ilustrativa, com dados de exemplo.
             </p>
