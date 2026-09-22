@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Cloud, Globe, Headphones, Lock, Mail, Phone, RefreshCw } from "lucide-react";
 import { Logo } from "./Logo";
 import { EMAIL, PHONE_DISPLAY, WEBSITE } from "./contact";
@@ -68,11 +69,17 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-bold text-graphite">Institucional</h3>
             <ul className="mt-4 grid gap-3 text-sm text-muted-foreground">
-              {["Política de Privacidade", "LGPD", "Termos de Uso"].map((label) => (
-                <li key={label} title="Em breve">
-                  {label}
-                </li>
-              ))}
+              <li>
+                <Link to="/privacidade" className="transition-colors hover:text-primary">
+                  Política de Privacidade
+                </Link>
+              </li>
+              <li>
+                <Link to="/termos" className="transition-colors hover:text-primary">
+                  Termos de Uso
+                </Link>
+              </li>
+              <li title="Em breve">LGPD</li>
             </ul>
           </div>
         </div>
