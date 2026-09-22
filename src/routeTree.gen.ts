@@ -14,7 +14,9 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as MarketingAiRouteImport } from './routes/marketing-ai'
 import { Route as MarketingDashboardRouteImport } from './routes/marketing-dashboard'
 import { Route as PrecosRouteImport } from './routes/precos'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as SalesEngineRouteImport } from './routes/sales-engine'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as BlogSlugRouteImport } from './routes/blog_.$slug'
 import { Route as ApiAdminBufferRouteImport } from './routes/api/admin/buffer'
 import { Route as ApiAdminDashboardRouteImport } from './routes/api/admin/dashboard'
@@ -49,9 +51,19 @@ const PrecosRoute = PrecosRouteImport.update({
   path: '/precos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SalesEngineRoute = SalesEngineRouteImport.update({
   id: '/sales-engine',
   path: '/sales-engine',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
@@ -102,7 +114,9 @@ export interface FileRoutesByFullPath {
   '/marketing-ai': typeof MarketingAiRoute
   '/marketing-dashboard': typeof MarketingDashboardRoute
   '/precos': typeof PrecosRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sales-engine': typeof SalesEngineRoute
+  '/termos': typeof TermosRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/api/admin/buffer': typeof ApiAdminBufferRoute
   '/api/admin/dashboard': typeof ApiAdminDashboardRoute
@@ -118,7 +132,9 @@ export interface FileRoutesByTo {
   '/marketing-ai': typeof MarketingAiRoute
   '/marketing-dashboard': typeof MarketingDashboardRoute
   '/precos': typeof PrecosRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sales-engine': typeof SalesEngineRoute
+  '/termos': typeof TermosRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/api/admin/buffer': typeof ApiAdminBufferRoute
   '/api/admin/dashboard': typeof ApiAdminDashboardRoute
@@ -135,7 +151,9 @@ export interface FileRoutesById {
   '/marketing-ai': typeof MarketingAiRoute
   '/marketing-dashboard': typeof MarketingDashboardRoute
   '/precos': typeof PrecosRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sales-engine': typeof SalesEngineRoute
+  '/termos': typeof TermosRoute
   '/blog_/$slug': typeof BlogSlugRoute
   '/api/admin/buffer': typeof ApiAdminBufferRoute
   '/api/admin/dashboard': typeof ApiAdminDashboardRoute
@@ -153,7 +171,9 @@ export interface FileRouteTypes {
     | '/marketing-ai'
     | '/marketing-dashboard'
     | '/precos'
+    | '/privacidade'
     | '/sales-engine'
+    | '/termos'
     | '/blog/$slug'
     | '/api/admin/buffer'
     | '/api/admin/dashboard'
@@ -169,7 +189,9 @@ export interface FileRouteTypes {
     | '/marketing-ai'
     | '/marketing-dashboard'
     | '/precos'
+    | '/privacidade'
     | '/sales-engine'
+    | '/termos'
     | '/blog/$slug'
     | '/api/admin/buffer'
     | '/api/admin/dashboard'
@@ -185,7 +207,9 @@ export interface FileRouteTypes {
     | '/marketing-ai'
     | '/marketing-dashboard'
     | '/precos'
+    | '/privacidade'
     | '/sales-engine'
+    | '/termos'
     | '/blog_/$slug'
     | '/api/admin/buffer'
     | '/api/admin/dashboard'
@@ -202,7 +226,9 @@ export interface RootRouteChildren {
   MarketingAiRoute: typeof MarketingAiRoute
   MarketingDashboardRoute: typeof MarketingDashboardRoute
   PrecosRoute: typeof PrecosRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   SalesEngineRoute: typeof SalesEngineRoute
+  TermosRoute: typeof TermosRoute
   BlogSlugRoute: typeof BlogSlugRoute
   ApiAdminBufferRoute: typeof ApiAdminBufferRoute
   ApiAdminDashboardRoute: typeof ApiAdminDashboardRoute
@@ -250,11 +276,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrecosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sales-engine': {
       id: '/sales-engine'
       path: '/sales-engine'
       fullPath: '/sales-engine'
       preLoaderRoute: typeof SalesEngineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog_/$slug': {
@@ -322,7 +362,9 @@ const rootRouteChildren: RootRouteChildren = {
   MarketingAiRoute: MarketingAiRoute,
   MarketingDashboardRoute: MarketingDashboardRoute,
   PrecosRoute: PrecosRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   SalesEngineRoute: SalesEngineRoute,
+  TermosRoute: TermosRoute,
   BlogSlugRoute: BlogSlugRoute,
   ApiAdminBufferRoute: ApiAdminBufferRoute,
   ApiAdminDashboardRoute: ApiAdminDashboardRoute,
