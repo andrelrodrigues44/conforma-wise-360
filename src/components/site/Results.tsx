@@ -86,6 +86,12 @@ export function Results() {
             <StatCard key={s.label} stat={s} active={active} />
           ))}
         </div>
+
+        <div className="mt-6 text-center">
+          <p className="inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
+            Números de referência do produto, não uma média estatística de clientes.
+          </p>
+        </div>
       </div>
     </section>
   );
