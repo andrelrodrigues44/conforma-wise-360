@@ -17,7 +17,10 @@ const schema = z.object({
   telefone: z.string().trim().min(8).max(20),
   mensagem: z.string().trim().max(600).optional().default(""),
   website: z.string().optional(),
-  linha_comercial: z.enum(["consultoria", "plataforma", "ambos"]).optional().default("ambos"),
+  linha_comercial: z
+    .enum(["consultoria", "plataforma", "treinamento", "ambos"])
+    .optional()
+    .default("ambos"),
   interesse: z.string().trim().max(120).optional().default(""),
   segmento: z.string().trim().max(80).optional().default(""),
   porte: z.string().trim().max(50).optional().default(""),
@@ -32,7 +35,7 @@ type Dados = {
   email: string;
   telefone: string;
   mensagem: string;
-  linha_comercial: "consultoria" | "plataforma" | "ambos";
+  linha_comercial: "consultoria" | "plataforma" | "treinamento" | "ambos";
   interesse: string;
   segmento: string;
   porte: string;
@@ -59,6 +62,7 @@ function scoreLead(d: Dados): number {
   if ((d.unidades ?? 1) > 1) score += 15;
   if (/demonstra|plataforma|software|sistema/.test(interesse)) score += 25;
   if (/diagnóstico|diagnostico|consultoria|auditoria|licenciamento/.test(interesse)) score += 20;
+  if (/treinamento|curso|turma|capacita/.test(interesse)) score += 20;
   if (d.consentimento_marketing) score += 5;
   return Math.min(score, 100);
 }
@@ -139,7 +143,9 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
           const { supabase: supabaseClient } = await import("@/integrations/supabase/client");
           // Tabelas de CRM vivem no schema de marketing, fora dos tipos gerados.
           const supabase = supabaseClient as unknown as {
-            from: (table: string) => { insert: (values: Record<string, unknown>) => Promise<{ error: unknown }> };
+            from: (table: string) => {
+              insert: (values: Record<string, unknown>) => Promise<{ error: unknown }>;
+            };
           };
 
           const { error: insertError } = await supabase.from("leads_site").insert({
@@ -160,7 +166,9 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
             etapa: "novo",
             status: "aberto",
             proxima_acao: temp === "hot" ? "Contato comercial em até 48h" : "Qualificar lead",
-            proxima_acao_em: new Date(Date.now() + (temp === "hot" ? 48 : 72) * 60 * 60 * 1000).toISOString(),
+            proxima_acao_em: new Date(
+              Date.now() + (temp === "hot" ? 48 : 72) * 60 * 60 * 1000,
+            ).toISOString(),
             consentimento_marketing: dados.consentimento_marketing,
             ip: request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for"),
             user_agent: request.headers.get("user-agent"),
@@ -183,7 +191,9 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: zeptoToken.startsWith("Zoho-enczapikey") ? zeptoToken : `Zoho-enczapikey ${zeptoToken}`,
+                Authorization: zeptoToken.startsWith("Zoho-enczapikey")
+                  ? zeptoToken
+                  : `Zoho-enczapikey ${zeptoToken}`,
               },
               body: JSON.stringify({
                 from: { address: zeptoFrom, name: "Conforma360 — Site" },
@@ -195,7 +205,9 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
             });
             if (!res.ok) console.error("ZeptoMail error:", res.status, await res.text());
           } else {
-            console.error("ZEPTOMAIL_TOKEN / ZEPTOMAIL_FROM_ADDRESS não configurados — lead gravado, sem e-mail.");
+            console.error(
+              "ZEPTOMAIL_TOKEN / ZEPTOMAIL_FROM_ADDRESS não configurados — lead gravado, sem e-mail.",
+            );
           }
 
           return json({ ok: true, lead_id: insertError ? null : leadId, score, temperatura: temp });

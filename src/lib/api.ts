@@ -7,7 +7,7 @@ export interface LeadDemoInput {
   mensagem?: string | undefined;
   website?: string | undefined; // honeypot -- sempre vazio num envio humano
   // Qual serviço o visitante procura; o endpoint já grava e usa na pontuação do lead.
-  linha_comercial?: "consultoria" | "plataforma" | "ambos" | undefined;
+  linha_comercial?: "consultoria" | "plataforma" | "treinamento" | "ambos" | undefined;
   interesse?: string | undefined;
 }
 

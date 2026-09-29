@@ -25,7 +25,7 @@ const schema = z.object({
   website: z.string().max(0).optional(),
 });
 
-type Linha = "consultoria" | "plataforma";
+type Linha = "consultoria" | "plataforma" | "treinamento";
 
 // O que muda no formulário conforme o serviço que o visitante escolheu. A linha e o interesse
 // seguem no envio, pra você ver no cadastro de leads (e no e-mail de aviso) o que cada um pediu.
@@ -41,6 +41,12 @@ const TEXTOS: Record<Linha, { titulo: string; descricao: string; interesse: stri
     descricao:
       "Conversa inicial com um especialista para entender o seu cenário (licenciamento, SST, auditorias) e indicar o melhor caminho.",
     interesse: "Consultoria",
+  },
+  treinamento: {
+    titulo: "Treinamento para sua equipe",
+    descricao:
+      "Conte quantas pessoas e quais normas precisa (NR-35, NR-10, NR-33, NR-06...) na mensagem abaixo — preparamos uma proposta de turma fechada para sua empresa.",
+    interesse: "Treinamento para equipe/turma",
   },
 };
 
