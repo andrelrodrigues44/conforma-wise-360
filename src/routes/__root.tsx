@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { capturarUtm } from "../lib/utm";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -82,6 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Gestão integrada de Meio Ambiente, SST, Compliance e ESG." },
       { name: "author", content: "Conforma360" },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Conforma360" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
@@ -117,6 +119,16 @@ const organizationJsonLd = {
   address: { "@type": "PostalAddress", addressCountry: "BR" },
 };
 
+// Nome do site para o Google (é o que aparece acima do título no resultado da busca). Sem isso,
+// o Google escolhe sozinho e pode manter um nome antigo. "alternateName" cobre a grafia com espaço.
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Conforma360",
+  alternateName: ["Conforma 360", "Conforma360 Consultoria e Plataforma"],
+  url: "https://www.conforma360.com.br/",
+};
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR">
@@ -126,6 +138,11 @@ function RootShell({ children }: { children: ReactNode }) {
           type="application/ld+json"
           // biome-ignore lint: dado estatico, sem input de usuario -- seguro
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          // biome-ignore lint: dado estatico, sem input de usuario -- seguro
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
       <body>
@@ -138,6 +155,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    capturarUtm();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

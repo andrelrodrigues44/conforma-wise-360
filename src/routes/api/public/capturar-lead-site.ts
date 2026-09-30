@@ -26,6 +26,15 @@ const schema = z.object({
   porte: z.string().trim().max(50).optional().default(""),
   unidades: z.coerce.number().int().min(1).max(10000).optional(),
   consentimento_marketing: z.boolean().optional().default(false),
+  // Origem do clique, capturada da URL no navegador (src/lib/utm.ts) -- ausente = tráfego
+  // direto/orgânico, nunca inventado aqui.
+  utm_source: z.string().trim().max(120).optional(),
+  utm_medium: z.string().trim().max(120).optional(),
+  utm_campaign: z.string().trim().max(150).optional(),
+  utm_term: z.string().trim().max(150).optional(),
+  utm_content: z.string().trim().max(150).optional(),
+  gclid: z.string().trim().max(200).optional(),
+  fbclid: z.string().trim().max(200).optional(),
 });
 
 type Dados = {
@@ -41,6 +50,13 @@ type Dados = {
   porte: string;
   unidades?: number;
   consentimento_marketing: boolean;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  gclid?: string;
+  fbclid?: string;
 };
 
 function escapeHtml(value: string): string {
@@ -90,6 +106,7 @@ function notificacaoHtml(d: Dados, score: number, temp: string): string {
       ${linha("Segmento", d.segmento || "—")}
       ${linha("Interesse", d.interesse || "—")}
       ${linha("Score", `${score}/100 — ${temp.toUpperCase()}`)}
+      ${d.utm_source ? linha("Origem", [d.utm_source, d.utm_medium, d.utm_campaign].filter(Boolean).join(" / ")) : ""}
     </table>
     ${d.mensagem ? `<p style="margin-top:16px;color:#2C2C2C;font-size:14px"><strong>Mensagem:</strong><br/>${escapeHtml(d.mensagem)}</p>` : ""}
     <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0"/>
@@ -126,6 +143,17 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
             porte: parsed.data.porte,
             ...(parsed.data.unidades !== undefined ? { unidades: parsed.data.unidades } : {}),
             consentimento_marketing: parsed.data.consentimento_marketing,
+            ...(parsed.data.utm_source !== undefined ? { utm_source: parsed.data.utm_source } : {}),
+            ...(parsed.data.utm_medium !== undefined ? { utm_medium: parsed.data.utm_medium } : {}),
+            ...(parsed.data.utm_campaign !== undefined
+              ? { utm_campaign: parsed.data.utm_campaign }
+              : {}),
+            ...(parsed.data.utm_term !== undefined ? { utm_term: parsed.data.utm_term } : {}),
+            ...(parsed.data.utm_content !== undefined
+              ? { utm_content: parsed.data.utm_content }
+              : {}),
+            ...(parsed.data.gclid !== undefined ? { gclid: parsed.data.gclid } : {}),
+            ...(parsed.data.fbclid !== undefined ? { fbclid: parsed.data.fbclid } : {}),
           };
 
           const score = scoreLead(dados);
@@ -170,6 +198,13 @@ export const Route = createFileRoute("/api/public/capturar-lead-site")({
               Date.now() + (temp === "hot" ? 48 : 72) * 60 * 60 * 1000,
             ).toISOString(),
             consentimento_marketing: dados.consentimento_marketing,
+            utm_source: dados.utm_source ?? null,
+            utm_medium: dados.utm_medium ?? null,
+            utm_campaign: dados.utm_campaign ?? null,
+            utm_term: dados.utm_term ?? null,
+            utm_content: dados.utm_content ?? null,
+            gclid: dados.gclid ?? null,
+            fbclid: dados.fbclid ?? null,
             ip: request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for"),
             user_agent: request.headers.get("user-agent"),
           });

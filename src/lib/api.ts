@@ -9,6 +9,15 @@ export interface LeadDemoInput {
   // Qual serviço o visitante procura; o endpoint já grava e usa na pontuação do lead.
   linha_comercial?: "consultoria" | "plataforma" | "treinamento" | "ambos" | undefined;
   interesse?: string | undefined;
+  // Origem do clique (anúncio pago, etc.), capturada da URL em src/lib/utm.ts. Ausente = tráfego
+  // direto/orgânico.
+  utm_source?: string | undefined;
+  utm_medium?: string | undefined;
+  utm_campaign?: string | undefined;
+  utm_term?: string | undefined;
+  utm_content?: string | undefined;
+  gclid?: string | undefined;
+  fbclid?: string | undefined;
 }
 
 export async function enviarLeadDemo(data: LeadDemoInput): Promise<void> {
