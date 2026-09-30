@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { enviarLeadDemo } from "@/lib/api";
 import { obterUtm } from "@/lib/utm";
+import { dispararConversaoLead } from "@/lib/google-ads-tag";
 
 const schema = z.object({
   nome: z.string().trim().min(2, "Informe seu nome").max(100),
@@ -82,6 +83,7 @@ export function DemoDialog({
         interesse: textos.interesse,
         ...obterUtm(),
       });
+      dispararConversaoLead();
       setOpen(false);
       toast.success("Solicitação enviada!", {
         description: "Nossa equipe entrará em contato em até 1 dia útil.",
