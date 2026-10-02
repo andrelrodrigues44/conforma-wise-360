@@ -48,7 +48,6 @@ const planos = [
     selo: "Mais escolhido",
     itens: [
       "Tudo do Essencial",
-      "Conforma360 RAC",
       "Ambiental & ESG",
       "PSI — Risco Psicossocial (NR-1)",
       "Conforma IA",
@@ -58,7 +57,12 @@ const planos = [
     nome: "Enterprise",
     preco: "997",
     destaque: false,
-    itens: ["Tudo do Profissional", "Saúde Ocupacional", "Certificados de Treinamento"],
+    itens: [
+      "Tudo do Profissional",
+      "Conforma360 RAC",
+      "Saúde Ocupacional",
+      "Certificados de Treinamento",
+    ],
   },
 ];
 
@@ -80,7 +84,7 @@ const faq = [
   {
     pergunta: "O que é o Conforma360 RAC?",
     resposta:
-      "É o módulo dedicado a empresas prestadoras de serviço à Vale, com gestão de aderência aos Requisitos de Atividades Críticas (RAC), matriz de capacitação e inspeções por contrato. Já vem incluso a partir do plano Profissional.",
+      "É o módulo dedicado a empresas prestadoras de serviço à Vale, com gestão de aderência aos Requisitos de Atividades Críticas (RAC), matriz de capacitação e inspeções por contrato. Já vem incluso no plano Enterprise.",
   },
   {
     pergunta: "Vocês oferecem consultoria além do software?",
@@ -121,6 +125,7 @@ function PrecosPage() {
                 ) : null}
                 <h2 className="text-lg font-bold text-graphite">{p.nome}</h2>
                 <p className="mt-3 flex items-baseline gap-1">
+                  <span className="mr-1 text-sm text-muted-foreground">a partir de</span>
                   <span className="text-sm text-muted-foreground">R$</span>
                   <span className="text-4xl font-extrabold text-graphite">{p.preco}</span>
                   <span className="text-sm text-muted-foreground">/mês</span>
@@ -164,8 +169,7 @@ function PrecosPage() {
               <p className="mt-2 text-sm text-muted-foreground">
                 <strong className="text-graphite">Conforma360 RAC</strong> — módulo dedicado à
                 gestão de aderência aos Requisitos de Atividades Críticas, com matriz de
-                capacitação, inspeções e evidências por contrato. Já incluso a partir do plano
-                Profissional.
+                capacitação, inspeções e evidências por contrato. Já incluso no plano Enterprise.
               </p>
               <DemoDialog>
                 <Button variant="outline" className="mt-4">
