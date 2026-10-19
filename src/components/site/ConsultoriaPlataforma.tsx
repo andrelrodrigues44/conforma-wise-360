@@ -6,7 +6,9 @@ const consultoria = [
   "Meio Ambiente e licenciamento",
   "Segurança do Trabalho e SST",
   "ISO 14001 e ISO 45001",
-  "Requisitos legais e auditorias",
+  "Auditorias internas e de sistemas de gestão",
+  "Avaliação de requisitos legais na operação do cliente",
+  "Avaliação e auditoria de fornecedores",
 ];
 
 const plataforma = [
