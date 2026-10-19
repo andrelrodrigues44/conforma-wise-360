@@ -9,6 +9,7 @@ import { Modules } from "@/components/site/Modules";
 import { MobileSection } from "@/components/site/MobileSection";
 import { Dashboards } from "@/components/site/Dashboards";
 import { Segments } from "@/components/site/Segments";
+import { Clients } from "@/components/site/Clients";
 import { Partners } from "@/components/site/Partners";
 import { Benefits } from "@/components/site/Benefits";
 import { Comparison } from "@/components/site/Comparison";
@@ -53,6 +54,7 @@ function Index() {
         <MobileSection />
         <Dashboards />
         <Segments />
+        <Clients />
         <Partners />
         <Benefits />
         <Comparison />
