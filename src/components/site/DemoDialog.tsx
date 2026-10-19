@@ -41,7 +41,7 @@ const TEXTOS: Record<Linha, { titulo: string; descricao: string; interesse: stri
   consultoria: {
     titulo: "Solicitar consultoria",
     descricao:
-      "Conversa inicial com um especialista para entender o seu cenário (licenciamento, SST, auditorias) e indicar o melhor caminho.",
+      "Conversa inicial com um especialista para entender o seu cenário (licenciamento, SST, auditorias, requisitos legais e fornecedores) e indicar o melhor caminho.",
     interesse: "Consultoria",
   },
   treinamento: {
