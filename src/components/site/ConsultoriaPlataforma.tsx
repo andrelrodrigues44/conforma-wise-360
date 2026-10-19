@@ -7,7 +7,7 @@ const consultoria = [
   "Segurança do Trabalho e SST",
   "ISO 14001 e ISO 45001",
   "Auditorias internas e de sistemas de gestão",
-  "Avaliação de requisitos legais na operação do cliente",
+  "Avaliação de requisitos legais no sistema do cliente, de forma pontual e/ou contínua",
   "Avaliação e auditoria de fornecedores",
 ];
 
