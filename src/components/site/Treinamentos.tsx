@@ -25,7 +25,7 @@ const ISESMT_URL = "https://conforma360.isesmt.com";
 
 const individual = [
   "Cadastro em poucos minutos, sem burocracia",
-  "Cursos de NRs a distância (EAD), no seu ritmo",
+  "Cursos de NRs a distância (EAD), no seu ritmo, quando a norma permite",
   "Certificado digital emitido na conclusão",
   "Acesso pelo computador ou pelo celular",
 ];
@@ -129,6 +129,56 @@ export function Treinamentos() {
             </div>
           </div>
         ) : null}
+
+        <div className="mt-8 rounded-3xl border border-border bg-card p-6 shadow-soft sm:p-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-bold tracking-[0.18em] text-primary">
+                CURSOS EAD EM DESTAQUE
+              </p>
+              <h3 className="mt-1 text-2xl font-extrabold text-graphite">
+                Matrícula na hora, a partir de R$ 99
+              </h3>
+            </div>
+            <Button asChild variant="outline">
+              <a
+                href={`${ISESMT_URL}/blog/products?${EAD_UTM}`}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                Ver catálogo com mais de 100 cursos <ExternalLink className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {cursosEad.map((c) => (
+              <li key={c.slug}>
+                <a
+                  href={`${ISESMT_URL}/blog/productDetails/${c.slug}?${EAD_UTM}`}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="flex h-full flex-col justify-between gap-4 rounded-2xl border border-border bg-surface p-4 transition hover:border-primary/50"
+                >
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
+                      {c.nota}
+                    </p>
+                    <p className="mt-1 font-semibold text-graphite">{c.nome}</p>
+                  </div>
+                  <p className="flex items-baseline justify-between text-sm text-muted-foreground">
+                    <span>{c.horas} de carga horária</span>
+                    <span className="text-lg font-extrabold text-graphite">{c.preco}</span>
+                  </p>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-5 text-xs text-muted-foreground">
+            Certificado com validação por QR Code. Em cursos que a norma exige parte prática, essa
+            etapa é presencial; consulte a ficha de cada curso. Valores por aluno, sujeitos a
+            alteração.
+          </p>
+        </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
           <article className="rounded-3xl border border-border bg-card p-7 shadow-soft lg:p-9">
