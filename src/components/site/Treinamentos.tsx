@@ -22,6 +22,68 @@ import {
 } from "@/lib/turmas-abertas";
 
 const ISESMT_URL = "https://conforma360.isesmt.com";
+const EAD_UTM = "utm_source=site-principal&utm_medium=site&utm_campaign=ead-nov26";
+
+// Preços e cargas horárias lidos no catálogo da plataforma em 28/10/2026 (podem mudar no painel).
+// "100% online" só onde a norma permite e foi conferido (NR-20 Iniciação); nos demais, "online" ou "parte teórica".
+const cursosEad = [
+  {
+    slug: "nr-20-iniciacao-sobre-inflamaveis-e-combustiveis-9a8b69",
+    nome: "NR-20 Iniciação: inflamáveis e combustíveis",
+    nota: "100% online",
+    horas: "3h",
+    preco: "R$ 99",
+  },
+  {
+    slug: "nr-01-integracao-de-seguranca-do-trabalho-4h-b0dc5a",
+    nome: "NR 01 Integração de Segurança do Trabalho",
+    nota: "Online",
+    horas: "4h",
+    preco: "R$ 119",
+  },
+  {
+    slug: "nr-17-ergonomia-4-horas-df257b",
+    nome: "NR 17 Ergonomia",
+    nota: "Parte teórica online",
+    horas: "4h",
+    preco: "R$ 99",
+  },
+  {
+    slug: "nr-05-cipa-representante-nomeado-grau-de-risco-1-online-8fe3a4",
+    nome: "NR 05 CIPA: representante nomeado",
+    nota: "Online",
+    horas: "8h",
+    preco: "R$ 99",
+  },
+  {
+    slug: "nr-23-combate-a-incendio-basico-4-horas-73f15e",
+    nome: "NR 23 Brigada de incêndio, básico",
+    nota: "Parte teórica online",
+    horas: "4h",
+    preco: "R$ 147",
+  },
+  {
+    slug: "programa-de-conservacao-auditiva-pca-4h-8a1ddd",
+    nome: "PCA: Programa de Conservação Auditiva",
+    nota: "Online",
+    horas: "4h",
+    preco: "R$ 147",
+  },
+  {
+    slug: "prevencao-ao-assedio-moral-e-sexual-no-trabalho-2h-c8b59a",
+    nome: "Prevenção ao assédio moral e sexual",
+    nota: "Online",
+    horas: "2h",
+    preco: "R$ 197",
+  },
+  {
+    slug: "nr-26-sinalizacao-de-seguranca-4h-76f3f8",
+    nome: "NR 26 Sinalização de Segurança",
+    nota: "Parte teórica online",
+    horas: "4h",
+    preco: "R$ 147",
+  },
+];
 
 const individual = [
   "Cadastro em poucos minutos, sem burocracia",
