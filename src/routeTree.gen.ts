@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as LinksRouteImport } from './routes/links'
 import { Route as MarketingAiRouteImport } from './routes/marketing-ai'
 import { Route as MarketingDashboardRouteImport } from './routes/marketing-dashboard'
 import { Route as PrecosRouteImport } from './routes/precos'
@@ -34,6 +35,11 @@ const IndexRoute = IndexRouteImport.update({
 const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LinksRoute = LinksRouteImport.update({
+  id: '/links',
+  path: '/links',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketingAiRoute = MarketingAiRouteImport.update({
@@ -111,6 +117,7 @@ const ApiPublicCapturarLeadSiteRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/links': typeof LinksRoute
   '/marketing-ai': typeof MarketingAiRoute
   '/marketing-dashboard': typeof MarketingDashboardRoute
   '/precos': typeof PrecosRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/links': typeof LinksRoute
   '/marketing-ai': typeof MarketingAiRoute
   '/marketing-dashboard': typeof MarketingDashboardRoute
   '/precos': typeof PrecosRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/links': typeof LinksRoute
   '/marketing-ai': typeof MarketingAiRoute
   '/marketing-dashboard': typeof MarketingDashboardRoute
   '/precos': typeof PrecosRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/blog'
+    | '/links'
     | '/marketing-ai'
     | '/marketing-dashboard'
     | '/precos'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/blog'
+    | '/links'
     | '/marketing-ai'
     | '/marketing-dashboard'
     | '/precos'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/blog'
+    | '/links'
     | '/marketing-ai'
     | '/marketing-dashboard'
     | '/precos'
@@ -223,6 +235,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BlogRoute: typeof BlogRoute
+  LinksRoute: typeof LinksRoute
   MarketingAiRoute: typeof MarketingAiRoute
   MarketingDashboardRoute: typeof MarketingDashboardRoute
   PrecosRoute: typeof PrecosRoute
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/links': {
+      id: '/links'
+      path: '/links'
+      fullPath: '/links'
+      preLoaderRoute: typeof LinksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marketing-ai': {
@@ -359,6 +379,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BlogRoute: BlogRoute,
+  LinksRoute: LinksRoute,
   MarketingAiRoute: MarketingAiRoute,
   MarketingDashboardRoute: MarketingDashboardRoute,
   PrecosRoute: PrecosRoute,
