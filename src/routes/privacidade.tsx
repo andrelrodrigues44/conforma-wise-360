@@ -84,14 +84,14 @@ function PrivacyPage() {
           <h1 className="mt-6 text-3xl font-extrabold text-graphite sm:text-4xl">
             Política de Privacidade
           </h1>
-          <p className="mt-3 text-sm text-muted-foreground">(Última atualização: 22/09/2026)</p>
+          <p className="mt-3 text-sm text-muted-foreground">(Última atualização: 04/11/2026)</p>
 
           <div className="prose-conforma mt-10 grid gap-5">
             <p className="leading-relaxed text-muted-foreground">
-              A Conforma360 — operada por José Emílio Rodrigues (JER Engenharia &amp; Projetos), CNPJ
-              15.087.536/0001-63 (&quot;Conforma360&quot;, &quot;nós&quot;) — respeita sua privacidade e trata os dados
-              pessoais coletados neste site em conformidade com a Lei Geral de Proteção de Dados (Lei
-              13.709/2018 — LGPD).
+              A Conforma360 — operada por CONFORMA360 LTDA, CNPJ 69.974.414/0001-18, com sede em
+              Contagem/MG (&quot;Conforma360&quot;, &quot;nós&quot;) — respeita sua privacidade e
+              trata os dados pessoais coletados neste site em conformidade com a Lei Geral de
+              Proteção de Dados (Lei 13.709/2018 — LGPD).
             </p>
 
             {sections.map((section) => (

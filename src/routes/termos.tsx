@@ -5,8 +5,7 @@ import { Header } from "@/components/site/Header";
 
 const SITE_URL = "https://www.conforma360.com.br/termos";
 const title = "Termos de Uso | Conforma360";
-const description =
-  "Consulte as condições de acesso e uso do site e da plataforma Conforma360.";
+const description = "Consulte as condições de acesso e uso do site e da plataforma Conforma360.";
 
 const sections = [
   {
@@ -15,7 +14,7 @@ const sections = [
   },
   {
     title: "2. O que é o Conforma360.",
-    text: "Plataforma de gestão de conformidade, meio ambiente, segurança do trabalho, compliance legal e ESG, operada por José Emílio Rodrigues (JER Engenharia & Projetos), CNPJ 15.087.536/0001-63, oferecida por planos de assinatura mensal, com teste gratuito de 14 dias.",
+    text: "Plataforma de gestão de conformidade, meio ambiente, segurança do trabalho, compliance legal e ESG, operada pela CONFORMA360 LTDA, CNPJ 69.974.414/0001-18, oferecida por planos de assinatura mensal, com teste gratuito de 14 dias.",
   },
   {
     title: "3. Teste gratuito e assinatura.",
@@ -39,7 +38,7 @@ const sections = [
   },
   {
     title: "8. Foro.",
-    text: "Fica eleito o foro da comarca de Belo Horizonte, MG, para dirimir eventuais controvérsias.",
+    text: "Fica eleito o foro da comarca de Contagem, MG, para dirimir eventuais controvérsias.",
   },
 ];
 
@@ -74,7 +73,7 @@ function TermsPage() {
           </Link>
 
           <h1 className="mt-6 text-3xl font-extrabold text-graphite sm:text-4xl">Termos de Uso</h1>
-          <p className="mt-3 text-sm text-muted-foreground">(Última atualização: 22/09/2026)</p>
+          <p className="mt-3 text-sm text-muted-foreground">(Última atualização: 04/11/2026)</p>
 
           <div className="prose-conforma mt-10 grid gap-5">
             {sections.map((section) => (
