@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Cloud, Globe, Headphones, Lock, Mail, Phone, RefreshCw } from "lucide-react";
+import { Cloud, Globe, Headphones, Lock, Mail, Phone, RefreshCw, ShieldCheck } from "lucide-react";
 import { Logo } from "./Logo";
-import { EMAIL, PHONE_DISPLAY, WEBSITE } from "./contact";
+import { EMAIL, PHONE_DISPLAY, RESPONSAVEL_TECNICO, WEBSITE } from "./contact";
 
 const trust = [
   { icon: Cloud, title: "Tecnologia", text: "100% na nuvem" },
@@ -35,6 +35,17 @@ export function Footer() {
               Plataforma integrada de Gestão Ambiental, Segurança do Trabalho, Compliance Legal, ESG
               e Operações.
             </p>
+            <div className="mt-5 flex max-w-sm items-start gap-3 rounded-lg border border-border bg-background p-3">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-accent text-primary">
+                <ShieldCheck className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 text-xs text-muted-foreground">
+                <p className="text-sm font-bold text-graphite">Responsabilidade técnica</p>
+                <p className="mt-0.5">{RESPONSAVEL_TECNICO.nome}</p>
+                <p>{RESPONSAVEL_TECNICO.titulos}</p>
+                <p className="font-semibold text-graphite">{RESPONSAVEL_TECNICO.registro}</p>
+              </div>
+            </div>
           </div>
 
           <div>
