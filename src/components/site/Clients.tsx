@@ -1,8 +1,8 @@
 import { ArrowUpRight, Building2 } from "lucide-react";
 
-// Empresas que já estão testando a plataforma. Descrições baseadas no que cada
-// empresa publica no próprio site. Sem logos por enquanto (adicionar `logo`
-// quando o cliente enviar/autorizar o arquivo).
+// Empresas que usam a plataforma. Descrições baseadas no que cada empresa publica
+// no próprio site. Sem logos por enquanto (adicionar `logo` quando o cliente
+// enviar/autorizar o arquivo). Só listar com autorização do cliente.
 const clientes = [
   {
     nome: "M&GEO Projetos de Engenharia",
@@ -13,12 +13,12 @@ const clientes = [
     siteLabel: "megeo.com.br",
   },
   {
-    nome: "Guimarães Construção e Administração",
-    sigla: "GC",
+    nome: "Major Drilling",
+    sigla: "MD",
     descricao:
-      "Construção civil e industrial: edificações, estruturas em concreto armado, manutenção industrial e saneamento.",
-    site: "https://guimaraesconstrucao.com.br/",
-    siteLabel: "guimaraesconstrucao.com.br",
+      "Serviços especializados de perfuração para as indústrias de mineração e metalúrgica, de superfície e subterrâneos, com operações em vários continentes.",
+    site: "https://www.majordrilling.com/pt-br/",
+    siteLabel: "majordrilling.com",
   },
 ];
 
@@ -29,11 +29,11 @@ export function Clients() {
         <div className="mx-auto max-w-3xl text-center">
           <span className="text-xs font-bold tracking-[0.2em] text-primary">CLIENTES</span>
           <h2 className="mt-3 text-3xl font-extrabold text-graphite sm:text-4xl">
-            Empresas que já estão testando a Conforma360
+            Empresas que já usam a Conforma360
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Operações de engenharia e construção colocando a plataforma à prova na rotina de SST,
-            meio ambiente e conformidade.
+            Operações de engenharia e mineração usando a plataforma na rotina de SST, meio ambiente
+            e conformidade.
           </p>
         </div>
 
